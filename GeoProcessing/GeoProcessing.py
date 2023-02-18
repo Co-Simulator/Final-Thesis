@@ -12,7 +12,7 @@ class GeoDataProcess():
         self.selected_buildings = []
         self.lat = None
         self.lon = None
-        
+        print("ME")
         
     def Building_selector(self):
         total_buildings = len(self.Profile["features"])
