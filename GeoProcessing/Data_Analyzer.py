@@ -1,4 +1,5 @@
 import os
+import pyproj
 import random
 import geojson
 # import rasterio
@@ -6,28 +7,37 @@ import geopandas
 import shapefile
 import googlemaps
 import pandas as pd
+from lxml import etree
+from dbfread import DBF
 import lxml.etree as ET
 from geojson import dumps
 
 
 class Notification():
     
+    # ask the user how many building wants to select and return it to GeoProcessing file
     def select_building(self):
         ask_number = int(input("How many buildings you want to select: "))
         return ask_number
     
+    # Let the user know that IDs are assigned
     def ID_notif(self):
         print("   ")
         print("New IDs has been assigned to the selected buildings")
 
+    # Let the user know that names are assigned
     def name_notif(self):
         print("   ")
         print("New names has been assigned to the selected buildings")
 
+    # Let the user know that polygon type is assigned
     def type_notif(self):
         print("   ")
         print("Polygon type has been assigned to the selected buildings")
+ 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
     
+    # Show interfaces to the user and return the selected one
     def building_height_interface(self):
         print("   ")
         print("Choose one of below interfaces to continue the process:")
@@ -35,27 +45,32 @@ class Notification():
         user_input = input ("1_Pythonic interface.\n2_EXCEL file.\n3_CSV file.\n4_GeoSpatial\n5_Random assignment\n6_Skip and continue.\n7_Restart the process.\nType your answer:  ")  
         return user_input
         
+    # Use this message for all Excel interfaces
     def building_excel_interface(self):
         print("An excel file has been created")
         user_input = input("When the file is filled, press '1' to continue: ")
         return user_input
-
+    
+    # Use this message for all CSV interfaces
     def building_csv_interface(self):
         print("A csv file has been created")
         user_input = input("When the file is filled, press '1' to continue: ")
         return user_input
 
+    # Show interfaces to the user and return the selected one
     def building_category_interface(self):
         print("   ")
         print("Choose one of below interfaces to continue the process:")
         print("   ")
         user_input = input ("1_Pythonic interface.\n2_EXCEL file.\n3_CSV file.\n4_Google Places API\n5_Random assignment\n6_Skip and continue.\n7_Restart the process.\nType your answer:  ")  
         return user_input
-    
+ 
+    # All probable categories to be assumed as Residential 
     def building_category_API(self):
         residential_types = ["residenziale", "abitativa", "residenziale e commerciale", "residenziale e produttivo", "residential", "multi residential, multi-residential", "locality", "neighborhood"]
         return residential_types
 
+    # Show interfaces to the user and return the selected one
     def building_floor_interface(self):
         print("   ")
         print("Choose one of below interfaces to continue the process:")
@@ -63,6 +78,7 @@ class Notification():
         user_input = input ("1_Pythonic interface.\n2_EXCEL file.\n3_CSV file.\n4_Calculation based on height\n5_Random assignment\n6_Skip and continue.\n7_Restart the process.\nType your answer:  ")  
         return user_input
 
+    # Show interfaces to the user and return the selected one
     def building_surface_interface(self):
         print("   ")
         print("Choose one of below interfaces to continue the process:")
@@ -70,6 +86,7 @@ class Notification():
         user_input = input ("1_Pythonic interface.\n2_EXCEL file.\n3_CSV file.\n4_Random assignment\n5_Skip and continue.\n6_Restart the process.\nType your answer:  ")  
         return user_input
 
+    # Show interfaces to the user and return the selected one
     def building_construnction_interface(self):
         print("   ")
         print("Choose one of below interfaces to continue the process:")
@@ -110,6 +127,7 @@ class Initialization():
         geojson.write(dumps({"features": buffer}, indent=2) + "\n")
         geojson.close()
 
+    # Read the converted SHP which is saved in GeoJSON format
     def Converted_SHP_reader(self):
         for file_name in os.listdir("Files\B_Converted SHP to Geojson"):
             if file_name.endswith(".geojson"):
@@ -118,7 +136,8 @@ class Initialization():
         with open(os.path.join(input_directory, 'Files/B_Converted SHP to Geojson/' + Geo_file)) as File:
             converted_file = geojson.load(File)
         return converted_file
-
+    
+    # Read the static GeoJSON file given by the user
     def Zone_profile_reader(self):
         for file_name in os.listdir("Files\C_Zone Profile"):
             if file_name.endswith(".geojson"):
@@ -136,6 +155,7 @@ class Initialization():
         DTM = rasterio.open(os.path.join(input_directory, 'Files/E_GeoSpatial/DTM/' + DTM_file))
         return DTM
 
+    # Read DTM file and convert it if the standard is not in "EPSG:4326"
     def DTM_Convertor(self, DTM):
         input_directory = os.path.dirname(os.path.realpath('__file__'))
         DTM_rds = rasterio.open(os.path.join(input_directory, 'Files/E_GeoSpatial/DTM/' + DTM))
@@ -152,6 +172,7 @@ class Initialization():
         DSM = rasterio.open(os.path.join(input_directory, 'Files/E_GeoSpatial/DSM/' + DSM_file))
         return DSM
 
+    # Read DSM file and convert it if the standard is not in "EPSG:4326"
     def DSM_Convertoron(self, DSM):
         input_directory = os.path.dirname(os.path.realpath('__file__'))
         DSM_rds = rasterio.open(os.path.join(input_directory, 'Files/E_GeoSpatial/DSM' + DSM))
@@ -175,7 +196,7 @@ class Analyzer():
     def __len__(self, building):
         return len(building)
     
-    
+    # Check if there is any missing data on buildings height
     def height_analysis(self, selected_buildings, length):
         counter = 0
         for alt in range(length):
@@ -288,7 +309,7 @@ class Analyzer():
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
 
-
+    # Check if there is any missing data on buildings category
     def category_analysis(self, selected_buildings, length):
         counter = 0
         for categ in range(length):
@@ -392,7 +413,7 @@ class Analyzer():
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
 
-
+    # Check if there is any missing data on buildings floor
     def floor_analysis(self, selected_buildings, length):
         counter = 0
         for floor in range(length):
@@ -471,7 +492,7 @@ class Analyzer():
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
 
-
+    # Check if there is any missing data on buildings surface
     def surface_analysis(self, selected_buildings, length):
         counter = 0
         for floor in range(length):
@@ -539,7 +560,7 @@ class Analyzer():
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
 
-
+    # Check if there is any missing data on buildings construction year
     def construnction_analysis(self, selected_buildings, length):
         counter = 0
         for floor in range(length):
@@ -607,79 +628,115 @@ class Analyzer():
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
    
+    # Checkthe construction year and assign a construction standard
+    def construnction_type(self, selected_buildings, length):
 
-    def CityGML_creator(self, buildings, length):
-        residential = ["residenziale", "residenziale e commerciale", "residential", "abitativa"]
-        category = []
-        lat = []
-        lon = []
-        height = []
-        name = []
-        floors = []
-        area = []
-        construction = []
-        for i in range(length):
-            lat_building = []
-            lon_building = []
-            name.append(buildings[i]["properties"]["NOME"])
-            height.append(buildings[i]["properties"]["ALTEZZA_VO"]) 
-            floors.append(buildings[i]["properties"]["NUM_PIANI"]) 
-            construction.append(buildings[i]["properties"]["EPOCA"])
-            if buildings[i]["properties"]["EDIFC_USO"] in residential:
-                category.append("residential")
+        for j in range(length):
+            if selected_buildings[j]["properties"]["EPOCA"] in range(1000, 1921):
+                selected_buildings[j]["properties"]["Construction_Type"] = "STANDARD1"
+                
+            elif selected_buildings[j]["properties"]["EPOCA"] in range(1920, 1971):
+                selected_buildings[j]["properties"]["Construction_Type"] = "STANDARD2"
+        
+            elif selected_buildings[j]["properties"]["EPOCA"] in range(1971, 1980):
+                selected_buildings[j]["properties"]["Construction_Type"] = "STANDARD3"
+        
+            elif selected_buildings[j]["properties"]["EPOCA"] in range(1981, 2000):
+                selected_buildings[j]["properties"]["Construction_Type"] = "STANDARD4"
+        
+            elif selected_buildings[j]["properties"]["EPOCA"] in range(2000, 2040):
+                selected_buildings[j]["properties"]["Construction_Type"] = "STANDARD5"
             else:
-                category.append("non-residential")
-            area.append(buildings[i]["properties"]["SUPERFICIE"]) 
-            for b in range(len(buildings[i]["geometry"]["coordinates"][0])):
-                for c in range(1):
-                    lat_building.append(buildings[i]["geometry"]["coordinates"][0][b][0]) 
-                    lon_building.append(buildings[i]["geometry"]["coordinates"][0][b][1])
-            lat.append(lat_building) 
-            lon.append(lon_building)
-
-        geo_data = pd.DataFrame()            
-        geo_data.insert(0,"name", name)
-        geo_data.insert(1,"lat", lat)
-        geo_data.insert(2,"lon", lon)
-        geo_data.insert(3,"height", height)
-        geo_data.insert(4,"floors", floors)
-        geo_data.insert(5,"category", category)
-        geo_data.insert(6,"area", area)
-        geo_data.insert(7,"construction_year", construction)
+                pass
+        return selected_buildings
 
 
+    #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
+    #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
+
+    # Assign HVAC specifications based on building category
+    def HVAC_type(self, selected_buildings, length):
+
+        for i in range(length):
+            if selected_buildings[i]["properties"]["EDIFIC_USO"] == "residential":
+                dbf = DBF('Files/I_DBF_Files/air_conditioning.dbf')
+                dbf = pd.DataFrame(dbf)
+                col = dbf.columns
+                air_conditioning = []
+                selected_buildings[i]["properties"]["air_conditioning"] = air_conditioning
+                for j in range(len(col)):
+                    selected_buildings[j]["properties"]["air_conditioning"].append({col[j] : " "})
+            else:
+                dbf = DBF('Files/I_DBF_Files/air_conditioning.dbf')
+                dbf = pd.DataFrame(dbf)
+                col = dbf.columns
+                air_conditioning = []
+                selected_buildings[i]["properties"]["air_conditioning"] = air_conditioning
+                for j in range(len(col)):
+                    selected_buildings[j]["properties"]["air_conditioning"].append({col[j] :dbf.loc[:,col[j]].to_dict()})
+                
+        return selected_buildings
+
+    #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
+    #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
+
+    # Assign supply system specifications based on building category
+    def Supply_type(self, selected_buildings, length):
+
+        for i in range(length):
+            if selected_buildings[i]["properties"]["EDIFIC_USO"] == "residential":
+                dbf = DBF('Files/I_DBF_Files/supply_systems.dbf')
+                dbf = pd.DataFrame(dbf)
+                col = dbf.columns
+                supply_system = []
+                selected_buildings[i]["properties"]["supply_system"] = supply_system
+                for j in range(len(col)):
+                    selected_buildings[j]["properties"]["supply_system"].append({col[j] : " "})
+            else:
+                dbf = DBF('Files/I_DBF_Files/supply_systems.dbf')
+                dbf = pd.DataFrame(dbf)
+                col = dbf.columns
+                supply_system = []
+                selected_buildings[i]["properties"]["supply_system"] = supply_system
+                for j in range(len(col)):
+                    selected_buildings[j]["properties"]["supply_system"].append({col[j] :dbf.loc[:,col[j]].to_dict()})
+                
+        return selected_buildings
+
+    #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
+    #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
+
+    # def CityGML_creator(self, buildings, length):
 
 
-        citygml = ET.Element("{http://www.opengis.net/citygml/3.0}CityModel", nsmap={None: "http://www.opengis.net/citygml/3.0"})
+        # input_crs = pyproj.CRS('EPSG:4326')
+        # output_crs = pyproj.CRS('EPSG:4978')
+        # ns_citygml = 'http://www.opengis.net/citygml/2.0'
+        # ns_bldg = 'http://www.opengis.net/citygml/building/2.0'
+        # ns_gml = 'http://www.opengis.net/gml/3.2'
         
-        for _, row in geo_data.iterrows():
-            building = ET.SubElement(citygml, "{http://www.opengis.net/citygml/3.0}building")
-            name = ET.SubElement(building, "{http://www.opengis.net/citygml/3.0}name")
-            name.text = row["name"]
-            
-            lon = ET.SubElement(building, "{http://www.opengis.net/citygml/3.0}longitude")
-            lon.text = str(row["lon"])
-            
-            lat = ET.SubElement(building, "{http://www.opengis.net/citygml/3.0}latitude")
-            lat.text = str(row["lat"])
-            
-            height = ET.SubElement(building, "{http://www.opengis.net/citygml/3.0}height")
-            height.text = str(row["height"])
+        # root = etree.Element('{%s}CityModel' % ns_citygml, nsmap={None: ns_citygml, 'bldg': ns_bldg, 'gml': ns_gml})
+        # building = etree.SubElement(root, '{%s}building' % ns_bldg, {'{%s}id' % ns_gml: 'building1', 'usage': 'residential'})
+        # solid = etree.SubElement(building, '{%s}boundedBy' % ns_bldg)
         
-            floors = ET.SubElement(building, "{http://www.opengis.net/citygml/3.0}floors")
-            floors.text = str(row["floors"])
-            
-            category = ET.SubElement(building, "{http://www.opengis.net/citygml/3.0}category")
-            category.text = str(row["category"])
-            
-            area = ET.SubElement(building, "{http://www.opengis.net/citygml/3.0}area")
-            area.text = str(row["area"])
-            
-            construction = ET.SubElement(building, "{http://www.opengis.net/citygml/3.0}construction_year")
-            construction.text = str(row["construction_year"])
+        # geometry = pd.DataFrame({
+        #     'lon': [43.860304, 43.860301, 43.860296, 43.860298],
+        #     'lat': [18.411144, 18.411143, 18.411149, 18.411150],
+        #     'elev': [20.00, 20.00, 20.00, 20.00]
+        # })
+        # x, y, z = pyproj.transform(input_crs, output_crs, geometry['lon'].values, geometry['lat'].values, geometry['elev'].values)
         
-        tree = ET.ElementTree(citygml)
-        tree.write("Files/H_CityGML/buildings.xml", xml_declaration=True, encoding='UTF-8', pretty_print=True)
+        # pos_list = etree.SubElement(solid, '{%s}MultiSurface' % ns_gml)
+        # surface = etree.SubElement(pos_list, '{%s}surfaceMember' % ns_gml)
+        # polygon = etree.SubElement(surface, '{%s}Polygon' % ns_gml)
+        
+        # pos = ' '.join('{:.2f} {:.2f} {:.2f}'.format(x[i], y[i], z[i]) for i in range(len(x)))
+        # ring = etree.SubElement(polygon, '{%s}exterior' % ns_gml)
+        # pos_list = etree.SubElement(ring, '{%s}posList' % ns_gml, {'srsDimension': '3'})
+        # pos_list.text = pos
+        
+        # doc = etree.ElementTree(root)
+        # doc.write('output_citygml.gml', pretty_print=True, xml_declaration=True, encoding='UTF-8') 
     
 
     
