@@ -107,7 +107,7 @@ class Notification():
 class Initialization():
     
     def Places_API_key(self):
-        API_key = "AIzaSyAn-V_D0aPmOlPPbjxE8708udXES2cV4-8"
+        API_key = "AIzaSyAm-V_D0aPnOlPPbjxE8708udXSS2cV4-8"
         return API_key
     
     def SHP_reader(self):
