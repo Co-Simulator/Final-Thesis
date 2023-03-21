@@ -9,32 +9,26 @@ class Interface(object):
 	def __init__(self):
 		self.id=1
 	def GET(self, *uri, **params):
-		if (len(uri) > 0 and uri[0] == "coordinates"):
-			#Collected coordinates from the Interface
-			coordinates = str(params)
-            
-            # Still have a problem with format of passing a polygon to the API but the test version works
-			xmin, ymin, xmax, ymax = 7.67889, 45.06820, 7.68525, 45.07073
-			overpass_url = "http://overpass-api.de/api/interpreter"
-			overpass_query = f"""
-                [out:json];
-                (
-                  way["building"]({ymin},{xmin},{ymax},{xmax});
-                  rel["building"]({ymin},{xmin},{ymax},{xmax});
-                );
-                out body geom;
+		if (len(uri) > 0 and uri[0] == 'coordinates'):
+ 			coordinates = str(params["coordinates"])
+ 			pairs = coordinates.split(',')
+ 			poly = ' '.join(pairs)
+ 			overpass_url = "http://overpass-api.de/api/interpreter"
+ 			overpass_query = f"""
+            [out:json];
+            (
+              way["building"](poly:"{poly}");
+              node(w);
+            );
+            out center;
             """
-			response = requests.get(overpass_url, params={"data": overpass_query})
-			data = response.json()
-			features = data['elements']             
-			output_file = 'Downloaded_Data.geojson'
-			geojson = {
-                "type": "FeatureCollection",
-			    "features": features
-            }
-			with open(output_file, 'w') as f:
-                         json.dump(geojson, f)
-			return open('index.html')
+ 			response = requests.post(overpass_url, data=overpass_query)
+ 			data = json.loads(response.content)
+ 			buildings = [element for element in data["elements"] if element["type"] == "way" and "tags" in element and element["tags"].get("building")]
+ 			with open('G:/Final-Project/GeoProcessing/Files/J_Downloaded_Fence/Geo-Fence.geojson', 'w') as f:
+                            json.dump(buildings, f)
+
+ 			return open('index.html')
 		else:
 			return open('index.html')
 
