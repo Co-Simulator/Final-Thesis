@@ -198,7 +198,7 @@ class Notification():
         return ask_edit
     
     def element_edit_select(self, grid_elements):
-        print(f"Available elements in the converted network are: \n{grid_elements}")
+        print(f"Available elements in the network are: \n{grid_elements}")
         print("      ")
         elem_number = int(input("How many elements you want to edit? "))
         return elem_number
@@ -349,169 +349,173 @@ class CaseFileEditor():
         else:
             self.grid_elements.append("STORAGE")
         return self.grid_elements
+        
     
-    
-    def grid_elements_analyzer_editor(self, net, elem_name):
-        if elem_name == "bus":
-            edit_method = Notification.edit_interface(self)
-            if edit_method == "1":
-                with pd.ExcelWriter("Exports/Excel/bus.xlsx") as excel_bus:
-                    self.buses.to_excel(excel_bus)
-                process = Notification.Excel_export(self)
-                if process == "1":
-                    updated_bus_values = pd.read_excel("Exports/Excel/bus.xlsx", index_col=0)
-                    for i in range(len(self.buses)):
-                        self.buses.loc[i] = updated_bus_values.loc[i].values
-            elif edit_method == "2":
-                self.buses.to_csv('Exports/CSV/bus.csv')
-                process = Notification.CSV_export(self)
-                if process == "1":
-                    updated_bus_values = pd.read_csv("Exports/CSV/bus.csv", index_col=0)
-                    for i in range(len(self.buses)):
-                        self.buses.loc[i] = updated_bus_values.loc[i].values
-                        self.net.bus = self.buses
+    def grid_elements_analyzer_editor(self, elem_name):
+        elem_number = Notification.element_edit_select(self, elem_name)
+        for i in range(elem_number):
+            elem_name = Notification.element_ask(self, i)
+            if elem_name == "bus":
+                edit_method = Notification.edit_interface(self)
+                if edit_method == "1":
+                    with pd.ExcelWriter("Exports/Excel/bus.xlsx") as excel_bus:
+                        self.buses.to_excel(excel_bus)
+                    process = Notification.Excel_export(self)
+                    if process == "1":
+                        updated_bus_values = pd.read_excel("Exports/Excel/bus.xlsx", index_col=0)
+                        for i in range(len(self.buses)):
+                            self.buses.loc[i] = updated_bus_values.loc[i].values
+                elif edit_method == "2":
+                    self.buses.to_csv('Exports/CSV/bus.csv')
+                    process = Notification.CSV_export(self)
+                    if process == "1":
+                        updated_bus_values = pd.read_csv("Exports/CSV/bus.csv", index_col=0)
+                        for i in range(len(self.buses)):
+                            self.buses.loc[i] = updated_bus_values.loc[i].values
+                            self.net.bus = self.buses
 
 
-        if elem_name == "gen":
-            edit_method = Notification.edit_interface(self)
-            if edit_method == "1":
-                with pd.ExcelWriter("Exports/Excel/gen.xlsx") as excel_gen:
-                    self.generators.to_excel(excel_gen)
-                process = Notification.Excel_export(self)
-                if process == "1":
-                    updated_gen_values = pd.read_excel("Exports/Excel/gen.xlsx", index_col=0)
-                    for i in range(len(self.generators)):
-                        self.generators.loc[i] = updated_gen_values.loc[i].values
-            elif edit_method == "2":
-                self.generators.to_csv('Exports/CSV/gen.csv')
-                process = Notification.CSV_export(self)
-                if process == "1":
-                    updated_gen_values = pd.read_csv("Exports/CSV/gen.csv", index_col=0)
-                    for i in range(len(self.generators)):
-                        self.generators.loc[i] = updated_gen_values.loc[i].values
-                        self.net.gen = self.generators
+            if elem_name == "gen":
+                edit_method = Notification.edit_interface(self)
+                if edit_method == "1":
+                    with pd.ExcelWriter("Exports/Excel/gen.xlsx") as excel_gen:
+                        self.generators.to_excel(excel_gen)
+                    process = Notification.Excel_export(self)
+                    if process == "1":
+                        updated_gen_values = pd.read_excel("Exports/Excel/gen.xlsx", index_col=0)
+                        for i in range(len(self.generators)):
+                            self.generators.loc[i] = updated_gen_values.loc[i].values
+                elif edit_method == "2":
+                    self.generators.to_csv('Exports/CSV/gen.csv')
+                    process = Notification.CSV_export(self)
+                    if process == "1":
+                        updated_gen_values = pd.read_csv("Exports/CSV/gen.csv", index_col=0)
+                        for i in range(len(self.generators)):
+                            self.generators.loc[i] = updated_gen_values.loc[i].values
+                            self.net.gen = self.generators
 
 
-        if elem_name == "load":
-            edit_method = Notification.edit_interface(self)
-            if edit_method == "1":
-                with pd.ExcelWriter("Exports/Excel/load.xlsx") as excel_load:
-                    self.loads.to_excel(excel_load)
-                process = Notification.Excel_export(self)
-                if process == "1":
-                    updated_load_values = pd.read_excel("Exports/Excel/load.xlsx", index_col=0)
-                    for i in range(len(self.loads)):
-                        self.loads.loc[i] = updated_load_values.loc[i].values
-            elif edit_method == "2":
-                self.loads.to_csv('Exports/CSV/load.csv')
-                process = Notification.CSV_export(self)
-                if process == "1":
-                    updated_load_values = pd.read_csv("Exports/CSV/load.csv", index_col=0)
-                    for i in range(len(self.loads)):
-                        self.loads.loc[i] = updated_load_values.loc[i].values
-                        self.net.load = self.loads
+            if elem_name == "load":
+                edit_method = Notification.edit_interface(self)
+                if edit_method == "1":
+                    with pd.ExcelWriter("Exports/Excel/load.xlsx") as excel_load:
+                        self.loads.to_excel(excel_load)
+                    process = Notification.Excel_export(self)
+                    if process == "1":
+                        updated_load_values = pd.read_excel("Exports/Excel/load.xlsx", index_col=0)
+                        for i in range(len(self.loads)):
+                            self.loads.loc[i] = updated_load_values.loc[i].values
+                elif edit_method == "2":
+                    self.loads.to_csv('Exports/CSV/load.csv')
+                    process = Notification.CSV_export(self)
+                    if process == "1":
+                        updated_load_values = pd.read_csv("Exports/CSV/load.csv", index_col=0)
+                        for i in range(len(self.loads)):
+                            self.loads.loc[i] = updated_load_values.loc[i].values
+                            self.net.load = self.loads
 
 
-        if elem_name == "ext_grid":
-            edit_method = Notification.edit_interface(self)
-            if edit_method == "1":
-                with pd.ExcelWriter("Exports/Excel/ext_grid.xlsx") as excel_ext_grid:
-                    self.ext_grids.to_excel(excel_ext_grid)
-                process = Notification.Excel_export(self)
-                if process == "1":
-                    updated_ext_grid_values = pd.read_excel("Exports/Excel/ext_grid.xlsx", index_col=0)
-                    for i in range(len(self.ext_grids)):
-                        self.ext_grids.loc[i] = updated_ext_grid_values.loc[i].values
-            elif edit_method == "2":
-                self.ext_grids.to_csv('Exports/CSV/ext_grid.csv')
-                process = Notification.CSV_export(self)
-                if process == "1":
-                    updated_ext_grid_values = pd.read_csv("Exports/CSV/ext_grid.csv", index_col=0)
-                    for i in range(len(self.ext_grids)):
-                        self.ext_grids.loc[i] = updated_ext_grid_values.loc[i].values
-                        self.net.ext_grid = self.ext_grids
+            if elem_name == "ext_grid":
+                edit_method = Notification.edit_interface(self)
+                if edit_method == "1":
+                    with pd.ExcelWriter("Exports/Excel/ext_grid.xlsx") as excel_ext_grid:
+                        self.ext_grids.to_excel(excel_ext_grid)
+                    process = Notification.Excel_export(self)
+                    if process == "1":
+                        updated_ext_grid_values = pd.read_excel("Exports/Excel/ext_grid.xlsx", index_col=0)
+                        for i in range(len(self.ext_grids)):
+                            self.ext_grids.loc[i] = updated_ext_grid_values.loc[i].values
+                elif edit_method == "2":
+                    self.ext_grids.to_csv('Exports/CSV/ext_grid.csv')
+                    process = Notification.CSV_export(self)
+                    if process == "1":
+                        updated_ext_grid_values = pd.read_csv("Exports/CSV/ext_grid.csv", index_col=0)
+                        for i in range(len(self.ext_grids)):
+                            self.ext_grids.loc[i] = updated_ext_grid_values.loc[i].values
+                            self.net.ext_grid = self.ext_grids
 
 
-        if elem_name == "line":
-            edit_method = Notification.edit_interface(self)
-            if edit_method == "1":
-                with pd.ExcelWriter("Exports/Excel/line.xlsx") as excel_line:
-                    self.lines.to_excel(excel_line)
-                process = Notification.Excel_export(self)
-                if process == "1":
-                    updated_line_values = pd.read_excel("Exports/Excel/line.xlsx", index_col=0)
-                    for i in range(len(self.lines)):
-                        self.lines.loc[i] = updated_line_values.loc[i].values
-            elif edit_method == "2":
-                self.lines.to_csv('Exports/CSV/line.csv')
-                process = Notification.CSV_export(self)
-                if process == "1":
-                    updated_line_values = pd.read_csv("Exports/CSV/line.csv", index_col=0)
-                    for i in range(len(self.lines)):
-                        self.lines.loc[i] = updated_line_values.loc[i].values
-                        self.net.line = self.lines
+            if elem_name == "line":
+                edit_method = Notification.edit_interface(self)
+                if edit_method == "1":
+                    with pd.ExcelWriter("Exports/Excel/line.xlsx") as excel_line:
+                        self.lines.to_excel(excel_line)
+                    process = Notification.Excel_export(self)
+                    if process == "1":
+                        updated_line_values = pd.read_excel("Exports/Excel/line.xlsx", index_col=0)
+                        for i in range(len(self.lines)):
+                            self.lines.loc[i] = updated_line_values.loc[i].values
+                elif edit_method == "2":
+                    self.lines.to_csv('Exports/CSV/line.csv')
+                    process = Notification.CSV_export(self)
+                    if process == "1":
+                        updated_line_values = pd.read_csv("Exports/CSV/line.csv", index_col=0)
+                        for i in range(len(self.lines)):
+                            self.lines.loc[i] = updated_line_values.loc[i].values
+                            self.net.line = self.lines
 
 
-        if elem_name == "trafo":
-            edit_method = Notification.edit_interface(self)
-            if edit_method == "1":
-                with pd.ExcelWriter("Exports/Excel/trafo.xlsx") as excel_trafo:
-                    self.trafos.to_excel(excel_trafo)
-                process = Notification.Excel_export(self)
-                if process == "1":
-                    updated_trafo_values = pd.read_excel("Exports/Excel/trafo.xlsx", index_col=0)
-                    for i in range(len(self.trafos)):
-                        self.trafos.loc[i] = updated_trafo_values.loc[i].values
-            elif edit_method == "2":
-                self.trafos.to_csv('Exports/CSV/trafo.csv')
-                process = Notification.CSV_export(self)
-                if process == "1":
-                    updated_trafo_values = pd.read_csv("Exports/CSV/trafo.csv", index_col=0)
-                    for i in range(len(self.trafos)):
-                        self.trafos.loc[i] = updated_trafo_values.loc[i].values
-                        self.net.trafo = self.trafos
+            if elem_name == "trafo":
+                edit_method = Notification.edit_interface(self)
+                if edit_method == "1":
+                    with pd.ExcelWriter("Exports/Excel/trafo.xlsx") as excel_trafo:
+                        self.trafos.to_excel(excel_trafo)
+                    process = Notification.Excel_export(self)
+                    if process == "1":
+                        updated_trafo_values = pd.read_excel("Exports/Excel/trafo.xlsx", index_col=0)
+                        for i in range(len(self.trafos)):
+                            self.trafos.loc[i] = updated_trafo_values.loc[i].values
+                elif edit_method == "2":
+                    self.trafos.to_csv('Exports/CSV/trafo.csv')
+                    process = Notification.CSV_export(self)
+                    if process == "1":
+                        updated_trafo_values = pd.read_csv("Exports/CSV/trafo.csv", index_col=0)
+                        for i in range(len(self.trafos)):
+                            self.trafos.loc[i] = updated_trafo_values.loc[i].values
+                            self.net.trafo = self.trafos
 
 
-        if elem_name == "switch":
-            edit_method = Notification.edit_interface(self)
-            if edit_method == "1":
-                with pd.ExcelWriter("Exports/Excel/switch.xlsx") as excel_switch:
-                    self.switches.to_excel(excel_switch)
-                process = Notification.Excel_export(self)
-                if process == "1":
-                    updated_switch_values = pd.read_excel("Exports/Excel/switch.xlsx", index_col=0)
-                    for i in range(len(self.switches)):
-                        self.switches.loc[i] = updated_switch_values.loc[i].values
-            elif edit_method == "2":
-                self.switches.to_csv('Exports/CSV/switch.csv')
-                process = Notification.CSV_export(self)
-                if process == "1":
-                    updated_switch_values = pd.read_csv("Exports/CSV/switch.csv", index_col=0)
-                    for i in range(len(self.switches)):
-                        self.switches.loc[i] = updated_switch_values.loc[i].values
-                        self.net.switch = self.switches
+            if elem_name == "switch":
+                edit_method = Notification.edit_interface(self)
+                if edit_method == "1":
+                    with pd.ExcelWriter("Exports/Excel/switch.xlsx") as excel_switch:
+                        self.switches.to_excel(excel_switch)
+                    process = Notification.Excel_export(self)
+                    if process == "1":
+                        updated_switch_values = pd.read_excel("Exports/Excel/switch.xlsx", index_col=0)
+                        for i in range(len(self.switches)):
+                            self.switches.loc[i] = updated_switch_values.loc[i].values
+                elif edit_method == "2":
+                    self.switches.to_csv('Exports/CSV/switch.csv')
+                    process = Notification.CSV_export(self)
+                    if process == "1":
+                        updated_switch_values = pd.read_csv("Exports/CSV/switch.csv", index_col=0)
+                        for i in range(len(self.switches)):
+                            self.switches.loc[i] = updated_switch_values.loc[i].values
+                            self.net.switch = self.switches
 
 
-        if elem_name == "storage":
-            edit_method = Notification.edit_interface(self)
-            if edit_method == "1":
-                with pd.ExcelWriter("Exports/Excel/storage.xlsx") as excel_storage:
-                    self.storages.to_excel(excel_storage)
-                process = Notification.Excel_export(self)
-                if process == "1":
-                    updated_storage_values = pd.read_excel("Exports/Excel/storage.xlsx", index_col=0)
-                    for i in range(len(self.storages)):
-                        self.storages.loc[i] = updated_storage_values.loc[i].values
-            elif edit_method == "2":
-                self.storages.to_csv('Exports/CSV/storage.csv')
-                process = Notification.CSV_export(self)
-                if process == "1":
-                    updated_storage_values = pd.read_csv("Exports/CSV/storage.csv", index_col=0)
-                    for i in range(len(self.storages)):
-                        self.storages.loc[i] = updated_storage_values.loc[i].values
-                        self.net.storage = self.storages 
-        pp.runpp(self.net)
-        print(self.net)  
+            if elem_name == "storage":
+                edit_method = Notification.edit_interface(self)
+                if edit_method == "1":
+                    with pd.ExcelWriter("Exports/Excel/storage.xlsx") as excel_storage:
+                        self.storages.to_excel(excel_storage)
+                    process = Notification.Excel_export(self)
+                    if process == "1":
+                        updated_storage_values = pd.read_excel("Exports/Excel/storage.xlsx", index_col=0)
+                        for i in range(len(self.storages)):
+                            self.storages.loc[i] = updated_storage_values.loc[i].values
+                elif edit_method == "2":
+                    self.storages.to_csv('Exports/CSV/storage.csv')
+                    process = Notification.CSV_export(self)
+                    if process == "1":
+                        updated_storage_values = pd.read_csv("Exports/CSV/storage.csv", index_col=0)
+                        for i in range(len(self.storages)):
+                            self.storages.loc[i] = updated_storage_values.loc[i].values
+                            self.net.storage = self.storages 
+            print("   ")
+            print("Values of the chosen elements have been updated successfully")
+            print(self.net)  
 
 
 
@@ -611,5 +615,6 @@ class Excel_grid_creator():
                     else:
                         pass               
                     globals()["storage" + str(storage)] = pp.create_storage(self.net, bus = storag_bus, p_kw = excel.at[storage, "p_kw"], max_e_kwh = excel.at[storage, "max_e_kwh"],
-                                                                      p_mw = excel.at[storage, "p_mw"], max_e_mwh = excel.at[storage, "max_e_mwh"], name = excel.at[storage, "name"])
-        print(self.net)  
+                                                                            p_mw = excel.at[storage, "p_mw"], max_e_mwh = excel.at[storage, "max_e_mwh"], name = excel.at[storage, "name"])
+        print(self.net)
+        return self.net

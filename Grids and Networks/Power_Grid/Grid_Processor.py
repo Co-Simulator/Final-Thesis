@@ -266,4 +266,10 @@ if __name__ == "__main__":
     elif interface == "6":
         net = pp.create_empty_network(name = "Excel Grid")
         Excel_Process = Excel_grid_creator(net)
-        Excel_Process.Excel_file_analyzer()  
+        net = Excel_Process.Excel_file_analyzer()  
+        answer = Notification.file_edit(Notification)
+        if answer == "2":
+            Main = CaseFileEditor(net)
+            elements = Main.grid_element_detector()
+            Main.grid_elements_analyzer_editor(elements)
+
