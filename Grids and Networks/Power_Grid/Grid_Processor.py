@@ -2,7 +2,7 @@ import os
 import warnings
 import pandas as pd
 import pandapower as pp
-from Helper import Notification, CaseFileReader, CaseFileEditor
+from Helper import Notification, CaseFileReader, CaseFileEditor, Excel_grid_creator
 
 
 class UserGridCreator():
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     if interface == "1":
         net_name = Notification.net_name(Notification)
         net = pp.create_empty_network(name = net_name)
-        Notification.grid_creation_confirm(Notification, net)
+        Notification.grid_creation_confirm(Notification)
         Main_Grid = UserGridCreator(net, Grid_Elements)
         Main_Grid.bus()
         Main_Grid.ext_grid()
@@ -241,7 +241,7 @@ if __name__ == "__main__":
 
     elif interface == "2":
         net = CaseFileReader.MATPower_reader(CaseFileReader)
-        Notification.case_file_import_confirm(Notification)
+        Notification.case_file_import_confirm(Notification, net)
         Main_Process = CaseFileProcessor(net)
         Main_Process.MATPower_processor()
         

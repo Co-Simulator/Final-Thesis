@@ -191,7 +191,7 @@ class Notification():
         
     def case_file_import_confirm(self, net):
         print("The Case File has been imported")
-        pp.runpp(net)
+        # pp.runpp(net)
         
     def file_edit(self):
         ask_edit = input("Choose one of below options to continue the process.\n1_Run the case file\n2_Edit the case file\nType your answer: ")
@@ -237,7 +237,7 @@ class Notification():
 class CaseFileReader():
     
     def MATPower_reader(self):
-        for file_name in os.listdir("G:\Project\Power_Grid\Case Files\MatPower files"):
+        for file_name in os.listdir("G:\Final-Project\Grids and Networks\Power_Grid\Case Files\MatPower files"):
             if file_name.endswith(".mat"):
                 MAT_File = file_name
         MAT_name = os.path.splitext(MAT_File)[0]
@@ -273,15 +273,15 @@ class CaseFileReader():
         warnings.filterwarnings('ignore')
         return net
     
-     def Excel_reader(self):
-        for file_name in os.listdir("G:\Project\Power_Grid\Case Files\Excel files"):
-            if file_name.endswith(".xlsx"):
-                Excel = file_name
-        input_directory = os.path.dirname(os.path.realpath('__file__'))
-        File = os.path.join(input_directory, 'Case Files/Excel files/' + Excel)
-        Excel_file = pd.ExcelFile(File)
-        warnings.filterwarnings('ignore')
-        return Excel_file   
+    def Excel_reader(self):
+       for file_name in os.listdir("G:\Final-Project\Grids and Networks\Power_Grid\Case Files\Excel files"):
+           if file_name.endswith(".xlsx"):
+               Excel = file_name
+       input_directory = os.path.dirname(os.path.realpath('__file__'))
+       File = os.path.join(input_directory, 'Case Files/Excel files/' + Excel)
+       Excel_file = pd.ExcelFile(File)
+       warnings.filterwarnings('ignore')
+       return Excel_file   
 
 
 
@@ -365,11 +365,11 @@ class CaseFileEditor():
             elif edit_method == "2":
                 self.buses.to_csv('Exports/CSV/bus.csv')
                 process = Notification.CSV_export(self)
-                    if process == "1":
-                        updated_bus_values = pd.read_csv("Exports/CSV/bus.csv", index_col=0)
-                        for i in range(len(self.buses)):
-                            self.buses.loc[i] = updated_bus_values.loc[i].values
-                            self.net.bus = self.buses
+                if process == "1":
+                    updated_bus_values = pd.read_csv("Exports/CSV/bus.csv", index_col=0)
+                    for i in range(len(self.buses)):
+                        self.buses.loc[i] = updated_bus_values.loc[i].values
+                        self.net.bus = self.buses
 
 
         if elem_name == "gen":
@@ -385,11 +385,11 @@ class CaseFileEditor():
             elif edit_method == "2":
                 self.generators.to_csv('Exports/CSV/gen.csv')
                 process = Notification.CSV_export(self)
-                    if process == "1":
-                        updated_gen_values = pd.read_csv("Exports/CSV/gen.csv", index_col=0)
-                        for i in range(len(self.generators)):
-                            self.generators.loc[i] = updated_gen_values.loc[i].values
-                            self.net.gen = self.generators
+                if process == "1":
+                    updated_gen_values = pd.read_csv("Exports/CSV/gen.csv", index_col=0)
+                    for i in range(len(self.generators)):
+                        self.generators.loc[i] = updated_gen_values.loc[i].values
+                        self.net.gen = self.generators
 
 
         if elem_name == "load":
@@ -405,11 +405,11 @@ class CaseFileEditor():
             elif edit_method == "2":
                 self.loads.to_csv('Exports/CSV/load.csv')
                 process = Notification.CSV_export(self)
-                    if process == "1":
-                        updated_load_values = pd.read_csv("Exports/CSV/load.csv", index_col=0)
-                        for i in range(len(self.loads)):
-                            self.loads.loc[i] = updated_load_values.loc[i].values
-                            self.net.load = self.loads
+                if process == "1":
+                    updated_load_values = pd.read_csv("Exports/CSV/load.csv", index_col=0)
+                    for i in range(len(self.loads)):
+                        self.loads.loc[i] = updated_load_values.loc[i].values
+                        self.net.load = self.loads
 
 
         if elem_name == "ext_grid":
@@ -425,11 +425,11 @@ class CaseFileEditor():
             elif edit_method == "2":
                 self.ext_grids.to_csv('Exports/CSV/ext_grid.csv')
                 process = Notification.CSV_export(self)
-                    if process == "1":
-                        updated_ext_grid_values = pd.read_csv("Exports/CSV/ext_grid.csv", index_col=0)
-                        for i in range(len(self.ext_grids)):
-                            self.ext_grids.loc[i] = updated_ext_grid_values.loc[i].values
-                            self.net.ext_grid = self.ext_grids
+                if process == "1":
+                    updated_ext_grid_values = pd.read_csv("Exports/CSV/ext_grid.csv", index_col=0)
+                    for i in range(len(self.ext_grids)):
+                        self.ext_grids.loc[i] = updated_ext_grid_values.loc[i].values
+                        self.net.ext_grid = self.ext_grids
 
 
         if elem_name == "line":
@@ -445,11 +445,11 @@ class CaseFileEditor():
             elif edit_method == "2":
                 self.lines.to_csv('Exports/CSV/line.csv')
                 process = Notification.CSV_export(self)
-                    if process == "1":
-                        updated_line_values = pd.read_csv("Exports/CSV/line.csv", index_col=0)
-                        for i in range(len(self.lines)):
-                            self.lines.loc[i] = updated_line_values.loc[i].values
-                            self.net.line = self.lines
+                if process == "1":
+                    updated_line_values = pd.read_csv("Exports/CSV/line.csv", index_col=0)
+                    for i in range(len(self.lines)):
+                        self.lines.loc[i] = updated_line_values.loc[i].values
+                        self.net.line = self.lines
 
 
         if elem_name == "trafo":
@@ -465,11 +465,11 @@ class CaseFileEditor():
             elif edit_method == "2":
                 self.trafos.to_csv('Exports/CSV/trafo.csv')
                 process = Notification.CSV_export(self)
-                    if process == "1":
-                        updated_trafo_values = pd.read_csv("Exports/CSV/trafo.csv", index_col=0)
-                        for i in range(len(self.trafos)):
-                            self.trafos.loc[i] = updated_trafo_values.loc[i].values
-                            self.net.trafo = self.trafos
+                if process == "1":
+                    updated_trafo_values = pd.read_csv("Exports/CSV/trafo.csv", index_col=0)
+                    for i in range(len(self.trafos)):
+                        self.trafos.loc[i] = updated_trafo_values.loc[i].values
+                        self.net.trafo = self.trafos
 
 
         if elem_name == "switch":
@@ -485,11 +485,11 @@ class CaseFileEditor():
             elif edit_method == "2":
                 self.switches.to_csv('Exports/CSV/switch.csv')
                 process = Notification.CSV_export(self)
-                    if process == "1":
-                        updated_switch_values = pd.read_csv("Exports/CSV/switch.csv", index_col=0)
-                        for i in range(len(self.switches)):
-                            self.switches.loc[i] = updated_switch_values.loc[i].values
-                            self.net.switch = self.switches
+                if process == "1":
+                    updated_switch_values = pd.read_csv("Exports/CSV/switch.csv", index_col=0)
+                    for i in range(len(self.switches)):
+                        self.switches.loc[i] = updated_switch_values.loc[i].values
+                        self.net.switch = self.switches
 
 
         if elem_name == "storage":
@@ -505,11 +505,11 @@ class CaseFileEditor():
             elif edit_method == "2":
                 self.storages.to_csv('Exports/CSV/storage.csv')
                 process = Notification.CSV_export(self)
-                    if process == "1":
-                        updated_storage_values = pd.read_csv("Exports/CSV/storage.csv", index_col=0)
-                        for i in range(len(self.storages)):
-                            self.storages.loc[i] = updated_storage_values.loc[i].values
-                            self.net.storage = self.storages 
+                if process == "1":
+                    updated_storage_values = pd.read_csv("Exports/CSV/storage.csv", index_col=0)
+                    for i in range(len(self.storages)):
+                        self.storages.loc[i] = updated_storage_values.loc[i].values
+                        self.net.storage = self.storages 
         pp.runpp(self.net)
         print(self.net)  
 
@@ -525,48 +525,40 @@ class Excel_grid_creator():
     
     def __init__(self, net):
         self.Excel_file = CaseFileReader.Excel_reader(self)
-        self.sheets = file.sheet_names
+        self.sheets = self.Excel_file.sheet_names
         self.grid_elem = {"buses" : []}
         self.net = net
         
     def Excel_file_analyzer(self):
         for i in range(len(self.sheets)):
-            if "bus" in self.sheets:
-                sheet_bus = self.sheets.pop(i)
-                excel = pd.read_excel(self.Excel_file, sheet_name = sheet_bus, index_col = 0)
+            if self.sheets[i] == "bus":
+                excel = pd.read_excel(self.Excel_file, sheet_name = self.sheets[i], index_col = 0)
                 for bus in excel.index:
                     globals()["bus" + str(bus)] = pp.create_bus(self.net, vn_kv = excel.at[bus, "vn_kv"], in_service = excel.at[bus, "in_service"],  name = excel.at[bus, "name"])
                     self.grid_elem["buses"].append(excel.at[bus, "name"])
-
-
-            if "ext_grid" in self.sheets:
-                sheet_ext_grid = self.sheets.pop(i)
-                excel = pd.read_excel(self.Excel_file, sheet_name = sheet_ext_grid, index_col = 0)
-                for ext_grid in excel.index:
-                    bus_external = excel.at[ext_grid, "bus"]
+                    
+                    
+            if self.sheets[i] == "ext_grid":
+                excel = pd.read_excel(self.Excel_file, sheet_name = self.sheets[i], index_col = 0)
+                for ext in excel.index:
+                    bus_external = excel.at[ext, "bus"]
                     if bus_external in self.grid_elem["buses"]:
-                        ext_bus = globals()["bus" + str(ext_grid)]
-                        ext_vmpu = excel.at[ext_grid, "vm_pu"]
-                        ext_name = excel.at[ext_grid, "name"]
-                        globals()["ext_grid" + str(ext_grid)] = pp.create_ext_grid(self.net, bus = ext_bus , vm_pu = ext_vmpu, name = ext_name)
+                        ext_bus = globals()["bus" + str(ext)]
+                        globals()["ext_grid" + str(ext)] = pp.create_ext_grid(self.net, bus = ext_bus , vm_pu = excel.at[ext, "vm_pu"],
+                                                                              in_service = excel.at[ext, "in_service"], name = excel.at[ext, "name"])
 
-
-            if "load" in self.sheets:
-                sheet_load = self.sheets.pop(i)
-                excel = pd.read_excel(self.Excel_file, sheet_name = sheet_load, index_col = 0)
+            if self.sheets[i] == "load":
+                excel = pd.read_excel(self.Excel_file, sheet_name = self.sheets[i], index_col = 0)
                 for load in excel.index:
                     bus_load = excel.at[load, "bus"]
                     if bus_load in self.grid_elem["buses"]:
                         load_bus = globals()["bus" + str(load)]
-                        load_qkvar = excel.at[load, "q_kvar"]
-                        load_pmw = excel.at[load, "p_mw"]
-                        load_name = excel.at[load, "name"]
-                        globals()["load" + str(load)] = pp.create_load(self.net, bus = load_bus, q_kvar = load_qkvar, p_mw = load_pmw, name = load_name)
-  
+                        globals()["load" + str(load)] = pp.create_load(self.net, bus = load_bus, q_kvar = excel.at[load, "q_kvar"], in_service = excel.at[load, "in_service"],
+                                                                       p_mw = excel.at[load, "p_mw"], name = excel.at[load, "name"])
 
-            if "transformer" in self.sheets:
-                sheet_trafo = self.sheets.pop(i)
-                excel = pd.read_excel(self.Excel_file, sheet_name = sheet_trafo, index_col = 0) 
+
+            if self.sheets[i] == "trafo":
+                excel = pd.read_excel(self.Excel_file, sheet_name = self.sheets[i], index_col = 0) 
                 for trafo in excel.index:
                     for high in excel.index:
                         t_hv_bus = excel.at[trafo, "hv_bus"]
@@ -576,70 +568,48 @@ class Excel_grid_creator():
                             pass
                     for low in excel.index:
                         t_lv_bus = excel.at[trafo, "lv_bus"]
-                        if t_hv_bus in self.grid_elem["buses"]:
-                            hv = globals()["bus" + str(low)]  
+                        if t_lv_bus in self.grid_elem["buses"]:
+                            lv = globals()["bus" + str(low)]  
                         else:
                             pass    
-                    t_std = excel.at[trafo, "std_type"]
-                    t_name = excel.at[trafo, "name"]
-                    globals()["trafo" + str(trafo)] = pp.create_transformer(self.net, hv_bus = hv, lv_bus = lv, std_type = t_std, name = t_name)
-    
+                    globals()["trafo" + str(trafo)] = pp.create_transformer(self.net, hv_bus = hv, lv_bus = lv, in_service = excel.at[trafo, "in_service"],
+                                                                            std_type = excel.at[trafo, "std_type"], name = excel.at[trafo, "name"])
 
-        if "line" in self.sheets:
-            sheet_line = self.sheets.pop(i)
-            excel = pd.read_excel(self.Excel_file, sheet_name = sheet_line, index_col = 0)            
-            for line in excel.index:
-                for b_from in excel.index:
-                    bus_f = excel.at[line, "from_bus"]
+            if self.sheets[i] == "line":
+                excel = pd.read_excel(self.Excel_file, sheet_name = self.sheets[i], index_col = 0)            
+                for line in excel.index:
+                    for b_from in excel.index:
+                        bus_f = excel.at[line, "from_bus"]
                         if bus_f in self.grid_elem["buses"]:
                             b_f = globals()["bus" + str(b_from)] 
                         else:
                             pass
-                for b_to in excel.index:
-                    bus_t = excel.at[line, "to_bus"]
+                    for b_to in excel.index:
+                        bus_t = excel.at[line, "to_bus"]
                         if bus_t in self.grid_elem["buses"]:
                             b_t = globals()["bus" + str(b_to)] 
                         else:
-                            pass
-                l_std = excel.at[line, "std_type"]
-                l_length = excel.at[line, "length"]
-                l_name = excel.at[line, "name"]                    
-                globals()["Line" + str(line)] = pp.create_line(self.net, from_bus = b_f, to_bus = b_t, length_km = l_length, std_type = l_std, name = l_name)
+                            pass                  
+                    globals()["Line" + str(line)] = pp.create_line(self.net, from_bus = b_f, to_bus = b_t, length_km = excel.at[line, "length_km"], in_service = excel.at[line, "in_service"],
+                                                                   std_type = excel.at[line, "std_type"], name = excel.at[line, "name"] )
 
-
-        if "switch" in self.sheets:
-            sheet_switch = self.sheets.pop(i)
-            excel = pd.read_excel(self.Excel_file, sheet_name = sheet_switch, index_col = 0)            
-            for switch in excel.index:
-                for source in excel.index:
-                    s_bus = excel.at[switch, "bus"]
-                    if s_bus in self.grid_elem["buses"]:
-                        swit_bus = globals()["bus" + str(source)]
+            if self.sheets[i] == "gen":
+                excel = pd.read_excel(self.Excel_file, sheet_name = self.sheets[i], index_col = 0)
+                for gen in excel.index:
+                    gen_load = excel.at[gen, "bus"]
+                    if gen_load in self.grid_elem["buses"]:
+                        bus_gen = globals()["bus" + str(gen)]
+                        globals()["gen" + str(gen)] = pp.create_gen(self.net, bus = bus_gen, p_mw = excel.at[gen, "p_mw"], in_service = excel.at[gen, "in_service"],
+                                                                    vm_pu = excel.at[gen, "vm_pu"], name = excel.at[gen, "name"])
+        
+            if self.sheets[i] == "storage":
+                excel = pd.read_excel(self.Excel_file, sheet_name = self.sheets[i], index_col = 0)            
+                for storage in excel.index:
+                    stor_bus = excel.at[storage, "bus"]
+                    if stor_bus in self.grid_elem["buses"]:
+                        storag_bus = globals()["bus" + str(storage)]
                     else:
-                        pass  
-                swit_name = excel.at[switch, "name"]
-                swit_element = excel.at[switch, "element"]
-                swit_element_t = excel.at[switch, "element type"]
-                swit_closed = excel.at[switch, "closed"]                    
-                globals()["Switch" + str(switch)] = pp.create_switch(self.net, bus = swit_bus, element = swit_element,
-                                                et = swit_element_t, closed = swit_closed, name = swit_name)
-  
-    
-        if "storage" in self.sheets:
-            sheet_storage = self.sheets.pop(i)
-            excel = pd.read_excel(self.Excel_file, sheet_name = sheet_storage, index_col = 0)            
-            for storage in excel.index:
-                stor_bus = excel.at[storage, "bus"]
-                if stor_bus in self.grid_elem["buses"]:
-                    storag_bus = globals()["bus" + str(storage)]
-                else:
-                    pass               
-                stor_name = excel.at[storage, "name"]
-                stor_pkw = excel.at[storage, "p_kw"]
-                stor_max_ekwh = excel.at[storage, "max_e_kwh"]
-                stor_pmw = excel.at[storage, "p_mw"]
-                stor_max_emwh = excel.at[storage, "max_e_mwh"]
-                globals()["storage" + str(storage)] = pp.create_storage(self.net, bus = storag_bus, p_kw = stor_pkw, max_e_kwh = stor_max_ekwh,
-                                                                  p_mw = stor_pmw, max_e_mwh = stor_max_emwh, name = stor_name)
-        pp.runpp(self.net)
+                        pass               
+                    globals()["storage" + str(storage)] = pp.create_storage(self.net, bus = storag_bus, p_kw = excel.at[storage, "p_kw"], max_e_kwh = excel.at[storage, "max_e_kwh"],
+                                                                      p_mw = excel.at[storage, "p_mw"], max_e_mwh = excel.at[storage, "max_e_mwh"], name = excel.at[storage, "name"])
         print(self.net)  
