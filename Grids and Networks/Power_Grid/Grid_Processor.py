@@ -1,16 +1,17 @@
 import os
+import json
+import geojson
 import warnings
 import pandas as pd
 import pandapower as pp
 from Helper import Notification, CaseFileReader, CaseFileEditor, Excel_grid_creator
 
-
+# Create a Power Grid based on user setting
 class UserGridCreator():
     def __init__(self, net, Grid_Elements):
         self.net = net
         self.bus_number = None
         self.Grid_Elements = Grid_Elements
-
 
     def bus(self):
         ask_bus = Notification.user_bus_interface(self)     
@@ -24,7 +25,6 @@ class UserGridCreator():
         else:
             pass
 
-
     def ext_grid(self):
         ask_ext_grid = Notification.user_ext_grid_interface(self)
         if ask_ext_grid == "1":
@@ -36,13 +36,9 @@ class UserGridCreator():
                     if ext_grid_bus in self.Grid_Elements["buses"][counter]:
                         globals()["ext_grid" + str(grid)] = pp.create_ext_grid(self.net, bus = globals()["bus" + str(counter)] , vm_pu = ext_grid_vmpu, name = ext_grid_name)
                         Notification.user_ext_grid_creation_confirm(self, self.net)
-
-                    else:
-                        pass
         else:
             pass
-        
-        
+
     def load(self):
         ask_load = Notification.user_load_interface(self)
         if ask_load == "1":
@@ -57,7 +53,6 @@ class UserGridCreator():
         else:
             pass
     
-
     def trasformer(self):
         ask_transformer = Notification.user_transform_interface(self)
         if ask_transformer == "1":
@@ -74,8 +69,7 @@ class UserGridCreator():
                 Notification.user_trafo_creation_confirm(self, self.net)     
         else:
             pass
-
-        
+ 
     def line(self):
         ask_line = Notification.user_line_interface(self)
         if ask_line == "1":
@@ -92,7 +86,6 @@ class UserGridCreator():
                 Notification.user_line_creation_confirm(self, self.net)     
         else:
             pass  
-
 
     def switch(self):
         ask_switch = Notification.user_switch_interface(self)
@@ -112,7 +105,6 @@ class UserGridCreator():
         else:
             pass  
 
-
     def storage(self):
         ask_storage = Notification.user_storage_interface(self)
         if ask_storage == "1":
@@ -126,101 +118,47 @@ class UserGridCreator():
                 Notification.user_storage_creation_confirm(self, self.net)     
         else:
             pass  
-
-
-
-
-#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
-#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~# 
-#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~# 
-
-
-
-
-class CaseFileProcessor():
-    
-    def __init__(self, net):
-        self.net = net
-
-
-    def MATPower_processor(self):
-        ask_edit = Notification.file_edit(self)
-        if ask_edit == "1":
-            pp.runpp(self.net)
-            print(self.net)   
-        elif ask_edit == "2":
-            CaseFileEditor(self.net)
-            grid_elements = CaseFileEditor.grid_element_detector(self)
-            elem_number = Notification.element_edit_select(self, grid_elements)
-            for elem in range(elem_number):
-                elem_name = Notification.element_ask(self, elem)
-                self.net = CaseFileEditor.grid_elements_analyzer_editor(self, self.net, elem_name)
-                pp.runpp(self.net)
-                print(self.net)  
-        else:
-            Notification.case_file_error(self)
-
-
-    def PyPower_processor(self):
-        ask_edit = Notification.file_edit(self)
-        if ask_edit == "1":
-            pp.runpp(self.net)
-            print(self.net)   
-        elif ask_edit == "2":
-            CaseFileEditor(self.net)
-            grid_elements = CaseFileEditor.grid_element_detector(self)
-            elem_number = Notification.element_edit_select(self, grid_elements)
-            for elem in range(elem_number):
-                elem_name = Notification.element_ask(self, elem)
-                self.net = CaseFileEditor.grid_elements_analyzer_editor(self, self.net, elem_name)                
-                pp.runpp(self.net)
-                print(self.net)              
-        else:
-            Notification.case_file_error(self)
-
-
-    def Pickle_processor(self):
-        ask_edit = Notification.file_edit(self)
-        if ask_edit == "1":
-            pp.runpp(self.net)
-            print(self.net)   
-        elif ask_edit == "2":
-            CaseFileEditor(self.net)
-            grid_elements = CaseFileEditor.grid_element_detector(self)
-            elem_number = Notification.element_edit_select(self, grid_elements)
-            for elem in range(elem_number):
-                elem_name = Notification.element_ask(self, elem)
-                self.net = CaseFileEditor.grid_elements_analyzer_editor(self, self.net, elem_name)                
-                pp.runpp(self.net)
-                print(self.net)              
-        else:
-            Notification.case_file_error(self)
-
-            
-    def JSON_processor(self):
-        ask_edit = Notification.file_edit(self)
-        if ask_edit == "1":
-            pp.runpp(self.net)
-            print(self.net)   
-        elif ask_edit == "2":
-            CaseFileEditor(self.net)
-            grid_elements = CaseFileEditor.grid_element_detector(self)
-            elem_number = Notification.element_edit_select(self, grid_elements)
-            for elem in range(elem_number):
-                elem_name = Notification.element_ask(self, elem)
-                self.net = CaseFileEditor.grid_elements_analyzer_editor(self, self.net, elem_name)                
-                pp.runpp(self.net)
-                print(self.net)              
-        else:
-            Notification.case_file_error(self)
        
+#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
+#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~# 
+#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#      
 
+class ElementAssigner():
+    def __init__(self, net):
+        self.buildings = None
+        self.grid = net
+
+    def bus_assigner(self):
+        for file_name in os.listdir("G:\Final-Project\GeoProcessing\Files\D_Teaser Profile"):
+            if file_name.endswith(".geojson"):
+                Geo_file = file_name
+        with open(os.path.join('G:/Final-Project/GeoProcessing/Files/D_Teaser Profile/' + Geo_file)) as File:
+            self.buildings = geojson.load(File)
+    
+        if len(self.buildings) == len(self.grid.bus):
+            for i in range(len(self.grid.bus)):
+                bus = self.grid.bus.iloc[i]
+                bus = bus.to_dict()
+                self.buildings[i]["tags"]["bus"] = bus
+                
+        elif len(self.buildings) > len(self.grid.bus):
+            for i in range(len(self.grid.bus)):
+                bus = self.grid.bus.iloc[i]
+                bus = bus.to_dict()
+                self.buildings[i]["tags"]["bus"] = bus
+                
+        elif len(self.buildings) < len(self.grid.bus):
+            for i in range(len(self.buildings)):
+                bus = self.grid.bus.iloc[i]
+                bus = bus.to_dict()
+                self.buildings[i]["tags"]["bus"] = bus
+
+        with open('Teaser.geojson', 'w') as f:
+                              json.dump(self.buildings, f)
 
 #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
 #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~# 
-#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#        
-
-
+#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~# 
 
 if __name__ == "__main__":
     Grid_Elements = {"buses" : []}
@@ -242,34 +180,81 @@ if __name__ == "__main__":
     elif interface == "2":
         net = CaseFileReader.MATPower_reader(CaseFileReader)
         Notification.case_file_import_confirm(Notification, net)
-        Main_Process = CaseFileProcessor(net)
-        Main_Process.MATPower_processor()
+        answer = Notification.file_edit(Notification)
+        if answer == "1":
+            Main = ElementAssigner(net)
+            Main.bus_assigner()
         
+        elif answer == "2":
+            Main = CaseFileEditor(net)
+            elements = Main.grid_element_detector()
+            Main.grid_elements_analyzer_editor(elements)
+            Main = ElementAssigner(net)
+            Main.bus_assigner()
+        else:
+            Notification.case_file_error(Notification)     
+   
     elif interface == "3":
         net = CaseFileReader.PyPower_reader(CaseFileReader)
         Notification.case_file_import_confirm(Notification)
-        Main_Process = CaseFileProcessor(net)
-        Main_Process.PyPower_processor()
+        answer = Notification.file_edit(Notification)
+        if answer == "1":
+            Main = ElementAssigner(net)
+            Main.bus_assigner()
+        elif answer == "2":
+            Main = CaseFileEditor(net)
+            elements = Main.grid_element_detector()
+            Main.grid_elements_analyzer_editor(elements)
+            Main = ElementAssigner(net)
+            Main.bus_assigner()
+        else:
+            Notification.case_file_error(Notification)  
         
     elif interface == "4":
         net = CaseFileReader.Pickle_reader(CaseFileReader)
         Notification.case_file_import_confirm(Notification)
-        Main_Process = CaseFileProcessor(net)
-        Main_Process.Pickle_processor()       
+        answer = Notification.file_edit(Notification)
+        if answer == "1":
+            Main = ElementAssigner(net)
+            Main.bus_assigner()
+        elif answer == "2":
+            Main = CaseFileEditor(net)
+            elements = Main.grid_element_detector()
+            Main.grid_elements_analyzer_editor(elements)
+            Main = ElementAssigner(net)
+            Main.bus_assigner()
+        else:
+            Notification.case_file_error(Notification)          
 
     elif interface == "5":
         net = CaseFileReader.JSON_reader(CaseFileReader)
         Notification.case_file_import_confirm(Notification)
-        Main_Process = CaseFileProcessor(net)
-        Main_Process.JSON_processor()       
+        answer = Notification.file_edit(Notification)
+        if answer == "1":
+            Main = ElementAssigner(net)
+            Main.bus_assigner()
+        elif answer == "2":
+            Main = CaseFileEditor(net)
+            elements = Main.grid_element_detector()
+            Main.grid_elements_analyzer_editor(elements)
+            Main = ElementAssigner(net)
+            Main.bus_assigner()
+        else:
+            Notification.case_file_error(Notification)          
 
     elif interface == "6":
         net = pp.create_empty_network(name = "Excel Grid")
         Excel_Process = Excel_grid_creator(net)
         net = Excel_Process.Excel_file_analyzer()  
         answer = Notification.file_edit(Notification)
-        if answer == "2":
+        if answer == "1":
+            Main = ElementAssigner(net)
+            Main.bus_assigner()
+        elif answer == "2":
             Main = CaseFileEditor(net)
             elements = Main.grid_element_detector()
             Main.grid_elements_analyzer_editor(elements)
-
+            Main = ElementAssigner(net)
+            Main.bus_assigner()
+        else:
+            Notification.case_file_error(Notification)  
