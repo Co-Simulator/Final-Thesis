@@ -1,5 +1,5 @@
 import os
-import pyproj
+import re
 import random
 import geojson
 # import rasterio
@@ -7,9 +7,7 @@ import geopandas
 import shapefile
 import googlemaps
 import pandas as pd
-from lxml import etree
 from dbfread import DBF
-import lxml.etree as ET
 from geojson import dumps
 
 
@@ -48,13 +46,13 @@ class Notification():
     # Use this message for all Excel interfaces
     def building_excel_interface(self):
         print("An excel file has been created")
-        user_input = input("When the file is filled, press '1' to continue: ")
+        user_input = input("After filling the file, you need to press '1' to proceed: ")
         return user_input
     
     # Use this message for all CSV interfaces
     def building_csv_interface(self):
         print("A csv file has been created")
-        user_input = input("When the file is filled, press '1' to continue: ")
+        user_input = input("After filling the file, you need to press '1' to proceed: ")
         return user_input
 
     # Show interfaces to the user and return the selected one
@@ -94,20 +92,14 @@ class Notification():
         user_input = input ("1_Pythonic interface.\n2_EXCEL file.\n3_CSV file.\n4_Random assignment\n5_Skip and continue.\n6_Restart the process.\nType your answer:  ")  
         return user_input
 
-
-
-
 #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
 #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
 #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
-
-
-
 
 class Initialization():
     
     def Places_API_key(self):
-        API_key = "AIzaSyAm-V_D0aPnOlPPbjxE8708udXSS2cV4-8"
+        API_key = "AIzaSyAn-V_D0aPmOlPPbjxE8708udXES2cV4-8"
         return API_key
     
     def SHP_reader(self):
@@ -136,16 +128,16 @@ class Initialization():
         with open(os.path.join(input_directory, 'Files/B_Converted SHP to Geojson/' + Geo_file)) as File:
             converted_file = geojson.load(File)
         return converted_file
-    
+
     # Read the static GeoJSON file given by the user
-    def Zone_profile_reader(self):
-        for file_name in os.listdir("Files\C_Zone Profile"):
+    def geo_fence_reader(self):
+        for file_name in os.listdir("G:\Final-Project\GeoProcessing\Files\J_Downloaded_Fence"):
             if file_name.endswith(".geojson"):
-                Zone_file = file_name
+                Geo_file = file_name
         input_directory = os.path.dirname(os.path.realpath('__file__'))
-        with open(os.path.join(input_directory, 'Files/C_Zone Profile/' + Zone_file)) as File:
-            zone_profile = geojson.load(File)
-        return zone_profile
+        with open(os.path.join(input_directory, 'Files/J_Downloaded_Fence/' + Geo_file)) as File:
+            Fence = geojson.load(File)
+        return Fence
 
     def DTM_reader(self):
         for file_name in os.listdir("Files\E_GeoSpatial\DTM"):
@@ -181,15 +173,9 @@ class Initialization():
         converted_DSM = rasterio.open(r"Files/E_GeoSpatial/DSM/DSM.tif")
         return converted_DSM
 
-
-
-
 #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
 #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
 #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
-
-
-
 
 class Analyzer():
     
@@ -200,112 +186,101 @@ class Analyzer():
     def height_analysis(self, selected_buildings, length):
         counter = 0
         for alt in range(length):
-            if "ALTEZZA_VO" in selected_buildings[alt]["properties"]:
+            if "height" in selected_buildings[alt]["tags"]:
                 pass
             else:
                 counter += 1
         return counter
     
-    
     def pythonic_height_interface(self, buildings, length):
         for j in range(length):
-            if "ALTEZZA_VO" in buildings[j]["properties"]:
+            if "height" in buildings[j]["tags"]:
                 pass
             else:
                 height_ask = input(f'What is the height of building number {j}? ')
-                buildings[j]["properties"]["ALTEZZA_VO"] = height_ask
+                buildings[j]["tags"]["height"] = height_ask
         return buildings
-    
     
     def excel_height_interface(self, buildings, length):
         height_dict = {"name": [],
                         "height": []}
         for i in range(length):
-            if "ALTEZZA_VO" in buildings[i]["properties"]:
+            if "height" in buildings[i]["tags"]:
                 pass
             else:
-                height_dict["name"].append(buildings[i]["properties"]["NOME"])
+                height_dict["name"].append(buildings[i]["Name"])
                 height_dict["height"].append("NONE")
         dataframe = pd.DataFrame.from_dict(height_dict)
         dataframe.to_excel("Files/F_Excel/building_height.xlsx") 
         user_input = Notification.building_excel_interface(self)
         if user_input == "1":
             height = pd.read_excel("Files/F_Excel/building_height.xlsx", index_col = 0)
-            for j in range(length):
-                buildings[j]["properties"]["ALTEZZA_VO"] = height["height"].loc[j]
+            for j in range(len(height)):
+                buildings[j]["tags"]["height"] = height["height"].loc[j]
+        print("Height values are assigned successfully")
         return buildings
-          
-    
+              
     def csv_height_interface(self, buildings, length):
         height_dict = {"name": [],
                         "height": []}
         for i in range(length):
-            if "ALTEZZA_VO" in buildings[i]["properties"]:
+            if "height" in buildings[i]["tags"]:
                 pass
             else:
-                height_dict["name"].append(buildings[i]["properties"]["NOME"])
+                height_dict["name"].append(buildings[i]["Name"])
                 height_dict["height"].append("NONE")
         dataframe = pd.DataFrame.from_dict(height_dict)
         dataframe.to_csv("Files/G_CSV/building_height.csv") 
         user_input = Notification.building_csv_interface(self)
         if user_input == "1":
             height = pd.read_csv("Files/G_CSV/building_height.csv", index_col = 0)
-            for j in range(length):
-                buildings[j]["properties"]["ALTEZZA_VO"] = height["height"].loc[j]
+            for j in range(len(height)):
+                buildings[j]["tags"]["height"] = height["height"].loc[j]
+        print("Height values are assigned successfully")
         return buildings      
 
-
     def GeoSpatial_height_interface(self, buildings, length):
+        DTM = Initialization.DTM_reader(self)
+        DTM_standard = DTM.crs
+        if DTM_standard == 'EPSG:4326':
+            pass
+        else:
+            DTM = Initialization.DTM_Convertor(self, DTM)
+        DSM = Initialization.DSM_reader(self)
+        DSM_standard = DTM.crs
+        if DSM_standard == 'EPSG:4326':
+            pass
+        else:
+            DSM = Initialization.DSM_Convertor(self, DTM)
+            
         for i in range(length):
-            if "ALTEZZA_VO" in buildings[i]["properties"]:
+            if "height" in buildings[i]["tags"]:
                 pass
             else:
-                DTM = Initialization.DTM_reader(self)
-                DTM_standard = DTM.crs
-                if DTM_standard == 'EPSG:4326':
-                    pass
+                lat = buildings[i]["center"]["lat"]
+                lon = buildings[i]["center"]["lon"]
+                DTM_row, DTM_col = DTM.index(lat, lon)
+                DSM_row, DSM_col = DSM.index(lat, lon)
+                DTM_data = DTM.read(1)
+                DSM_data = DSM.read(1)
+                elevation = DSM_data[DSM_row, DSM_col] - DTM_data[DTM_row, DTM_col]
+                print(elevation)
+                if elevation > 2:
+                    buildings[i]["tags"]["height"] = elevation
                 else:
-                    DTM = Initialization.DTM_Convertor(self, DTM)
-                    
-                DSM = Initialization.DSM_reader(self)
-                DSM_standard = DTM.crs
-                if DSM_standard == 'EPSG:4326':
-                    pass
-                else:
-                    DSM = Initialization.DSM_Convertor(self, DTM)
-                    
-                for i in range(length):
-                    x = []
-                    y = []
-                    for j in range(len(buildings[i]["geometry"]["coordinates"][0])):
-                        x.append(buildings[i]["geometry"]["coordinates"][0][j][0])
-                        y.append(buildings[i]["geometry"]["coordinates"][0][j][1])
-                        x.sort()
-                        y.sort()
-                        lat = sum(x)/len(x)
-                        lon = sum(y)/len(y)
-                    DTM_row, DTM_col = DTM.index(lat, lon)
-                    DSM_row, DSM_col = DSM.index(lat, lon)
-                    DTM_data = DTM.read(1)
-                    DSM_data = DSM.read(1)
-                    elevation = DSM_data[DSM_row, DSM_col] - DTM_data[DTM_row, DTM_col]
-                    print(elevation)
-                    if elevation > 2:
-                        buildings[i]["properties"]["ALTEZZA_VO"] = elevation
-                    else:
-                        del buildings[i]
+                    del buildings[i]
         return buildings
     
     def random_assign_height_interface(self, buildings, length):
         for i in range(length):
-            if "ALTEZZA_VO" in buildings[i]["properties"]:
+            if "height" in buildings[i]["tags"]:
                 pass
             else:
                 height = random.randint(3, 20)
-                buildings[i]["properties"]["ALTEZZA_VO"] = height
+                buildings[i]["tags"]["height"] = height
+        print("Missing heights are randomly assigned")
         return buildings
- 
-               
+           
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
 
@@ -313,74 +288,65 @@ class Analyzer():
     def category_analysis(self, selected_buildings, length):
         counter = 0
         for categ in range(length):
-            if "EDIFIC_USO" in selected_buildings[categ]["properties"]:
+            if "building:use" in selected_buildings[categ]["tags"] or "building" in selected_buildings[categ]["tags"]:
                 pass
             else:
                 counter += 1
         return counter
 
-
     def pythonic_category_interface(self, buildings, length):
         for j in range(length):
-            if 'EDIFIC_USO' in buildings[j]["properties"]:
+            if 'building:use' in buildings[j]["tags"] or "building" in buildings[j]["tags"]:
                 pass
             else:
                 categ_ask = input(f'What is the usage category of building number {j}? ')
-                buildings[j]["properties"]["EDIFIC_USO"] = categ_ask
+                buildings[j]["tags"]["building:use"] = categ_ask
         return buildings
-
 
     def excel_category_interface(self, buildings, length):
         category_dict = {"name": [],
                         "category": []}
         for i in range(length):
-            if "EDIFIC_USO" in buildings[i]["properties"]:
+            if "building:use" in buildings[i]["tags"]:
                 pass
             else:
-                category_dict["name"].append(buildings[i]["properties"]["NOME"])
+                category_dict["name"].append(buildings[i]["Name"])
                 category_dict["category"].append("NONE")
         dataframe = pd.DataFrame.from_dict(category_dict)
         dataframe.to_excel("Files/F_Excel/building_category.xlsx") 
         user_input = Notification.building_excel_interface(self)
         if user_input == "1":
             category = pd.read_excel("Files/F_Excel/building_category.xlsx", index_col = 0)
-            for j in range(length):
-                buildings[j]["properties"]["EDIFIC_USO"] = category["category"].loc[j]
+            for j in range(len(category)):
+                buildings[j]["tags"]["building:use"] = category["category"].loc[j]
         return buildings
-          
-    
+   
     def csv_category_interface(self, buildings, length):
         category_dict = {"name": [],
                         "category": []}
         for i in range(length):
-            if "EDIFIC_USO" in buildings[i]["properties"]:
+            if "building:use" in buildings[i]["tags"]:
                 pass
             else:
-                category_dict["name"].append(buildings[i]["properties"]["NOME"])
+                category_dict["name"].append(buildings[i]["Name"])
                 category_dict["category"].append("NONE")
         dataframe = pd.DataFrame.from_dict(category_dict)
         dataframe.to_csv("Files/G_CSV/building_category.csv") 
         user_input = Notification.building_csv_interface(self)
         if user_input == "1":
             category = pd.read_csv("Files/G_CSV/building_category.csv", index_col = 0)
-            for j in range(length):
-                buildings[j]["properties"]["EDIFIC_USO"] = category["category"].loc[j]
+            for j in range(len(category)):
+                buildings[j]["tags"]["building:use"] = category["category"].loc[j]
         return buildings     
-
 
     def API_category_interface(self, buildings, length):
         residential_types = Notification.building_category_API(self)
         for i in range(length):
-            if "EDIFIC_USO" in buildings[i]["properties"]:
+            if "building:use" in buildings[i]["tags"]:
                 pass
             else:
-                for j in range(len(buildings[i]["geometry"]["coordinates"][0])):
-                    x = []
-                    y = []
-                    x.append(buildings[i]["geometry"]["coordinates"][0][j][0])
-                    y.append(buildings[i]["geometry"]["coordinates"][0][j][1])
-                lon = str(sum(x)/len(x))
-                lat = str(sum(y)/len(y))
+                lat = buildings[i]["center"]["lat"]
+                lon = buildings[i]["center"]["lon"]
                 api_key = Initialization.Places_API_key(self)
                 gmaps = googlemaps.Client(key = api_key)
                 place_result = gmaps.places_nearby(location = (lat ,lon) , radius = 5)
@@ -394,21 +360,17 @@ class Analyzer():
                     else:
                         pass
                 if redisential == True:
-                    buildings[i]["properties"]["EDIFIC_USO"] = "residential"
+                    buildings[i]["tags"]["building:use"] = "residential"
                 else:
-                    buildings[i]["properties"]["EDIFIC_USO"] = "non-residential"
+                    buildings[i]["tags"]["building:use"] = "non-residential"
         return buildings
 
     def random_assign_category_interface(self, buildings, length):
         category = ["residential", "non-residential"]
         for i in range(length):
-            if "EDIFIC_USO" in buildings[i]["properties"]:
-                pass
-            else:
-                categ = random.choice(category)
-                buildings[i]["properties"]["EDIFIC_USO"] = categ
+            categ = random.choice(category)
+            buildings[i]["tags"]["building"] = categ
         return buildings
-
 
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
@@ -417,7 +379,7 @@ class Analyzer():
     def floor_analysis(self, selected_buildings, length):
         counter = 0
         for floor in range(length):
-            if "NUM_PIANI" in selected_buildings[floor]["properties"]:
+            if "building:levels" in selected_buildings[floor]["tags"]:
                 pass
             else:
                 counter += 1
@@ -425,69 +387,87 @@ class Analyzer():
 
     def pythonic_floor_interface(self, buildings, length):
         for j in range(length):
-            if 'NUM_PIANI' in buildings[j]["properties"]:
+            if 'building:levels' in buildings[j]["tags"]:
                 pass
             else:
                 floor_ask = input(f'How many floors does the building number {j} has? ')
-                buildings[j]["properties"]["NUM_PIANI"] = floor_ask
+                buildings[j]["tags"]["building:levels"] = floor_ask
         return buildings
 
     def excel_floor_interface(self, buildings, length):
         floor_dict = {"name": [],
                         "floors": []}
         for i in range(length):
-            if "NUM_PIANI" in buildings[i]["properties"]:
+            if "building:levels" in buildings[i]["tags"]:
                 pass
             else:
-                floor_dict["name"].append(buildings[i]["properties"]["NOME"])
+                floor_dict["name"].append(buildings[i]["Name"])
                 floor_dict["floors"].append("NONE")
         dataframe = pd.DataFrame.from_dict(floor_dict)
         dataframe.to_excel("Files/F_Excel/building_floors.xlsx") 
         user_input = Notification.building_excel_interface(self)
         if user_input == "1":
             floors = pd.read_excel("Files/F_Excel/building_floors.xlsx", index_col = 0)
-            for j in range(length):
-                buildings[j]["properties"]["NUM_PIANI"] = floors["floors"].loc[j]
+            for j in range(len(floors)):
+                buildings[j]["tags"]["building:levels"] = floors["floors"].loc[j]
         return buildings
 
     def csv_floor_interface(self, buildings, length):
         floor_dict = {"name": [],
                         "floors": []}
         for i in range(length):
-            if "NUM_PIANI" in buildings[i]["properties"]:
+            if "building:levels" in buildings[i]["tags"]:
                 pass
             else:
-                floor_dict["name"].append(buildings[i]["properties"]["NOME"])
+                floor_dict["name"].append(buildings[i]["Name"])
                 floor_dict["floors"].append("NONE")
         dataframe = pd.DataFrame.from_dict(floor_dict)
         dataframe.to_csv("Files/G_CSV/building_floors.csv") 
         user_input = Notification.building_csv_interface(self)
         if user_input == "1":
             floors = pd.read_csv("Files/G_CSV/building_floors.csv", index_col = 0)
-            for j in range(length):
-                buildings[j]["properties"]["NUM_PIANI"] = floors["floors"].loc[j]
+            for j in range(len(floors)):
+                buildings[j]["tags"]["building:levels"] = floors["floors"].loc[j]
         return buildings     
 
     def floor_assign_height_based_interface(self, buildings, length):
         for i in range(length):
-            if "NUM_PIANI" in buildings[i]["properties"]:
+            if "building:levels" in buildings[i]["tags"]:
                 pass
             else:
-                height = buildings[i]["properties"]["ALTEZZA_VO"]
-                floors = round(height/3)
-                buildings[i]["properties"]["NUM_PIANI"] = floors
-        return buildings
+                height = buildings[i]["tags"]["height"]
+                if type(height) == int or type(height) == float:
+                    pass
                 
+                elif re.match(r"^\d+m$", height):
+                    height = float(height[:-1])
+                    buildings[i]["tags"]["height"] = height
+                
+                elif re.match(r"^\d+\s*m$", height):
+                    height = float(height[:-2])
+        
+                elif re.match(r"^\d+(\.\d+)?$", height):
+                    height = float(height)
+        
+                elif re.match(r"^\d+(\.\d+)?\s*m$", height):
+                    height = float(height[:-2])
+        
+                else:
+                    height = float(height)
+            
+                buildings[i]["tags"]["height"] = height
+                floors = round(height/3)
+                buildings[i]["tags"]["building:levels"] = floors
+        return buildings           
    
     def random_assign_floor_interface(self, buildings, length):
         for i in range(length):
-            if "NUM_PIANI" in buildings[i]["properties"]:
+            if "building:levels" in buildings[i]["tags"]:
                 pass
             else:
                 floor = random.randint(1, 10)
-                buildings[i]["properties"]["NUM_PIANI"] = floor
+                buildings[i]["tags"]["building:levels"] = floor
         return buildings
-            
 
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
@@ -496,7 +476,7 @@ class Analyzer():
     def surface_analysis(self, selected_buildings, length):
         counter = 0
         for floor in range(length):
-            if "SUPERFICIE" in selected_buildings[floor]["properties"]:
+            if "surface" in selected_buildings[floor]["tags"]:
                 pass
             else:
                 counter += 1
@@ -504,58 +484,57 @@ class Analyzer():
             
     def pythonic_surface_interface(self, buildings, length):
         for j in range(length):
-            if 'SUPERFICIE' in buildings[j]["properties"]:
+            if 'surface' in buildings[j]["tags"]:
                 pass
             else:
                 surface_ask = input(f'What is the surface of building number {j} ? ')
-                buildings[j]["properties"]["SUPERFICIE"] = surface_ask
+                buildings[j]["tags"]["surface"] = surface_ask
         return buildings
 
     def excel_surface_interface(self, buildings, length):
         surface_dict = {"name": [],
                         "surface": []}
         for i in range(length):
-            if "SUPERFICIE" in buildings[i]["properties"]:
+            if "surface" in buildings[i]["tags"]:
                 pass
             else:
-                surface_dict["name"].append(buildings[i]["properties"]["NOME"])
+                surface_dict["name"].append(buildings[i]["Name"])
                 surface_dict["surface"].append("NONE")
         dataframe = pd.DataFrame.from_dict(surface_dict)
         dataframe.to_excel("Files/F_Excel/building_surface.xlsx") 
         user_input = Notification.building_excel_interface(self)
         if user_input == "1":
             surface = pd.read_excel("Files/F_Excel/building_surface.xlsx", index_col = 0)
-            for j in range(length):
-                buildings[j]["properties"]["SUPERFICIE"] = surface["surface"].loc[j]
+            for j in range(len(surface)):
+                buildings[j]["tags"]["surface"] = surface["surface"].loc[j]
         return buildings
 
     def csv_surface_interface(self, buildings, length):
         surface_dict = {"name": [],
                         "surface": []}
         for i in range(length):
-            if "SUPERFICIE" in buildings[i]["properties"]:
+            if "surface" in buildings[i]["tags"]:
                 pass
             else:
-                surface_dict["name"].append(buildings[i]["properties"]["NOME"])
+                surface_dict["name"].append(buildings[i]["Name"])
                 surface_dict["surface"].append("NONE")
         dataframe = pd.DataFrame.from_dict(surface_dict)
         dataframe.to_csv("Files/G_CSV/building_surface.csv") 
         user_input = Notification.building_csv_interface(self)
         if user_input == "1":
             surface = pd.read_csv("Files/G_CSV/building_surface.csv", index_col = 0)
-            for j in range(length):
-                buildings[j]["properties"]["SUPERFICIE"] = surface["surface"].loc[j]
+            for j in range(len(surface)):
+                buildings[j]["tags"]["surface"] = surface["surface"].loc[j]
         return buildings                
             
     def random_assign_surface_interface(self, buildings, length):
        for i in range(length):
-           if "SUPERFICIE" in buildings[i]["properties"]:
+           if "surface" in buildings[i]["tags"]:
                pass
            else:
                surface = random.randint(50, 250)
-               buildings[i]["properties"]["SUPERFICIE"] = surface
-       return buildings           
-            
+               buildings[i]["tags"]["surface"] = surface
+       return buildings                     
             
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
@@ -564,7 +543,7 @@ class Analyzer():
     def construnction_analysis(self, selected_buildings, length):
         counter = 0
         for floor in range(length):
-            if "EPOCA" in selected_buildings[floor]["properties"]:
+            if "start_date" in selected_buildings[floor]["tags"]:
                 pass
             else:
                 counter += 1
@@ -572,108 +551,106 @@ class Analyzer():
             
     def pythonic_construnction_interface(self, buildings, length):
         for j in range(length):
-            if 'EPOCA' in buildings[j]["properties"]:
+            if 'start_date' in buildings[j]["tags"]:
                 pass
             else:
                 construction_ask = input(f'What is the construnction year of building number {j} ? ')
-                buildings[j]["properties"]["EPOCA"] = construction_ask
+                buildings[j]["tags"]["start_date"] = construction_ask
         return buildings
 
     def excel_construnction_interface(self, buildings, length):
         construnction_dict = {"name": [],
                         "construnction": []}
         for i in range(length):
-            if "EPOCA" in buildings[i]["properties"]:
+            if "start_date" in buildings[i]["tags"]:
                 pass
             else:
-                construnction_dict["name"].append(buildings[i]["properties"]["NOME"])
+                construnction_dict["name"].append(buildings[i]["Name"])
                 construnction_dict["construnction"].append("NONE")
         dataframe = pd.DataFrame.from_dict(construnction_dict)
         dataframe.to_excel("Files/F_Excel/building_construnction.xlsx") 
         user_input = Notification.building_excel_interface(self)
         if user_input == "1":
             construnction = pd.read_excel("Files/F_Excel/building_construnction.xlsx", index_col = 0)
-            for j in range(length):
-                buildings[j]["properties"]["EPOCA"] = construnction["construnction"].loc[j]
+            for j in range(len(construnction)):
+                buildings[j]["tags"]["start_date"] = construnction["construnction"].loc[j]
         return buildings
 
     def csv_construnction_interface(self, buildings, length):
         construnction_dict = {"name": [],
                         "construnction": []}
         for i in range(length):
-            if "EPOCA" in buildings[i]["properties"]:
+            if "start_date" in buildings[i]["tags"]:
                 pass
             else:
-                construnction_dict["name"].append(buildings[i]["properties"]["NOME"])
+                construnction_dict["name"].append(buildings[i]["Name"])
                 construnction_dict["construnction"].append("NONE")
         dataframe = pd.DataFrame.from_dict(construnction_dict)
         dataframe.to_csv("Files/G_CSV/building_construnction.csv") 
         user_input = Notification.building_csv_interface(self)
         if user_input == "1":
             construnction = pd.read_csv("Files/G_CSV/building_construnction.csv", index_col = 0)
-            for j in range(length):
-                buildings[j]["properties"]["EPOCA"] = construnction["construnction"].loc[j]
+            for j in range(len(construnction)):
+                buildings[j]["tags"]["start_date"] = construnction["construnction"].loc[j]
         return buildings               
-    
+
     def random_assign_construnction_interface(self, buildings, length):
        for i in range(length):
-           if "EPOCA" in buildings[i]["properties"]:
+           if "start_date" in buildings[i]["tags"]:
                pass
            else:
                construnction = random.randint(1965, 1995)
-               buildings[i]["properties"]["EPOCA"] = construnction
+               buildings[i]["tags"]["start_date"] = construnction
        return buildings     
-
 
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
    
     # Checkthe construction year and assign a construction standard
     def construnction_type(self, selected_buildings, length):
-
         for j in range(length):
-            if selected_buildings[j]["properties"]["EPOCA"] in range(1000, 1921):
-                selected_buildings[j]["properties"]["Construction_Type"] = "STANDARD1"
+            if selected_buildings[j]["tags"]["start_date"] in range(1000, 1921):
+                selected_buildings[j]["tags"]["Construction_standard"] = "STANDARD1"
                 
-            elif selected_buildings[j]["properties"]["EPOCA"] in range(1920, 1971):
-                selected_buildings[j]["properties"]["Construction_Type"] = "STANDARD2"
+            elif selected_buildings[j]["tags"]["start_date"] in range(1920, 1971):
+                selected_buildings[j]["tags"]["Construction_standard"] = "STANDARD2"
         
-            elif selected_buildings[j]["properties"]["EPOCA"] in range(1971, 1980):
-                selected_buildings[j]["properties"]["Construction_Type"] = "STANDARD3"
+            elif selected_buildings[j]["tags"]["start_date"] in range(1971, 1980):
+                selected_buildings[j]["tags"]["Construction_standard"] = "STANDARD3"
         
-            elif selected_buildings[j]["properties"]["EPOCA"] in range(1981, 2000):
-                selected_buildings[j]["properties"]["Construction_Type"] = "STANDARD4"
+            elif selected_buildings[j]["tags"]["start_date"] in range(1981, 2000):
+                selected_buildings[j]["tags"]["Construction_standard"] = "STANDARD4"
         
-            elif selected_buildings[j]["properties"]["EPOCA"] in range(2000, 2040):
-                selected_buildings[j]["properties"]["Construction_Type"] = "STANDARD5"
+            elif selected_buildings[j]["tags"]["start_date"] in range(2000, 2040):
+                selected_buildings[j]["tags"]["Construction_standard"] = "STANDARD5"
             else:
-                pass
+                standard = ["STANDARD1", "STANDARD2", "STANDARD3", "STANDARD4", "STANDARD5"]
+                random_standard = random.choice(standard)
+                selected_buildings[j]["tags"]["Construction_standard"] = random_standard
         return selected_buildings
-
 
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
     #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
 
     # Assign HVAC specifications based on building category
     def HVAC_type(self, selected_buildings, length):
+        dbf = DBF('Files/I_DBF_Files/air_conditioning.dbf')
+        dbf = pd.DataFrame(dbf)
+        col = dbf.columns
+        residential_AirCondition = []
+        non_residential_AirCondition = []
+        
+        for j in range(len(col)):
+            non_residential_AirCondition.append({col[j] :dbf.loc[:,col[j]].to_dict()})
 
+        for k in range(len(col)):
+            residential_AirCondition.append({col[k] : " "})
+ 
         for i in range(length):
-            if selected_buildings[i]["properties"]["EDIFIC_USO"] == "residential":
-                dbf = DBF('Files/I_DBF_Files/air_conditioning.dbf')
-                dbf = pd.DataFrame(dbf)
-                col = dbf.columns
-                air_conditioning = []
-                selected_buildings[i]["properties"]["air_conditioning"] = air_conditioning
-                for j in range(len(col)):
-                    selected_buildings[j]["properties"]["air_conditioning"].append({col[j] : " "})
+            if selected_buildings[i]["tags"]["building"] == "residential":
+                selected_buildings[i]["tags"]["air_condition"] = residential_AirCondition
             else:
-                dbf = DBF('Files/I_DBF_Files/air_conditioning.dbf')
-                dbf = pd.DataFrame(dbf)
-                col = dbf.columns
-                air_conditioning = []
-                selected_buildings[i]["properties"]["air_conditioning"] = air_conditioning
-                for j in range(len(col)):
-                    selected_buildings[j]["properties"]["air_conditioning"].append({col[j] :dbf.loc[:,col[j]].to_dict()})
+                selected_buildings[i]["tags"]["air_condition"] = non_residential_AirCondition
                 
         return selected_buildings
 
@@ -682,76 +659,20 @@ class Analyzer():
 
     # Assign supply system specifications based on building category
     def Supply_type(self, selected_buildings, length):
-
+        dbf = DBF('Files/I_DBF_Files/supply_systems.dbf')
+        dbf = pd.DataFrame(dbf)
+        col = dbf.columns 
+        residential_supply_system = []
+        non_residential_supply_system = []
+        for j in range(len(col)):
+            non_residential_supply_system.append({col[j] :dbf.loc[:,col[j]].to_dict()})
+            
+        for k in range(len(col)):
+            residential_supply_system.append({col[k] : " "})
+        
         for i in range(length):
-            if selected_buildings[i]["properties"]["EDIFIC_USO"] == "residential":
-                dbf = DBF('Files/I_DBF_Files/supply_systems.dbf')
-                dbf = pd.DataFrame(dbf)
-                col = dbf.columns
-                supply_system = []
-                selected_buildings[i]["properties"]["supply_system"] = supply_system
-                for j in range(len(col)):
-                    selected_buildings[j]["properties"]["supply_system"].append({col[j] : " "})
+            if selected_buildings[i]["tags"]["building"] == "residential":
+                selected_buildings[i]["tags"]["supply_system"] = residential_supply_system
             else:
-                dbf = DBF('Files/I_DBF_Files/supply_systems.dbf')
-                dbf = pd.DataFrame(dbf)
-                col = dbf.columns
-                supply_system = []
-                selected_buildings[i]["properties"]["supply_system"] = supply_system
-                for j in range(len(col)):
-                    selected_buildings[j]["properties"]["supply_system"].append({col[j] :dbf.loc[:,col[j]].to_dict()})
-                
+                selected_buildings[i]["tags"]["supply_system"] = non_residential_supply_system
         return selected_buildings
-
-    #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
-    #~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
-
-    # def CityGML_creator(self, buildings, length):
-
-
-        # input_crs = pyproj.CRS('EPSG:4326')
-        # output_crs = pyproj.CRS('EPSG:4978')
-        # ns_citygml = 'http://www.opengis.net/citygml/2.0'
-        # ns_bldg = 'http://www.opengis.net/citygml/building/2.0'
-        # ns_gml = 'http://www.opengis.net/gml/3.2'
-        
-        # root = etree.Element('{%s}CityModel' % ns_citygml, nsmap={None: ns_citygml, 'bldg': ns_bldg, 'gml': ns_gml})
-        # building = etree.SubElement(root, '{%s}building' % ns_bldg, {'{%s}id' % ns_gml: 'building1', 'usage': 'residential'})
-        # solid = etree.SubElement(building, '{%s}boundedBy' % ns_bldg)
-        
-        # geometry = pd.DataFrame({
-        #     'lon': [43.860304, 43.860301, 43.860296, 43.860298],
-        #     'lat': [18.411144, 18.411143, 18.411149, 18.411150],
-        #     'elev': [20.00, 20.00, 20.00, 20.00]
-        # })
-        # x, y, z = pyproj.transform(input_crs, output_crs, geometry['lon'].values, geometry['lat'].values, geometry['elev'].values)
-        
-        # pos_list = etree.SubElement(solid, '{%s}MultiSurface' % ns_gml)
-        # surface = etree.SubElement(pos_list, '{%s}surfaceMember' % ns_gml)
-        # polygon = etree.SubElement(surface, '{%s}Polygon' % ns_gml)
-        
-        # pos = ' '.join('{:.2f} {:.2f} {:.2f}'.format(x[i], y[i], z[i]) for i in range(len(x)))
-        # ring = etree.SubElement(polygon, '{%s}exterior' % ns_gml)
-        # pos_list = etree.SubElement(ring, '{%s}posList' % ns_gml, {'srsDimension': '3'})
-        # pos_list.text = pos
-        
-        # doc = etree.ElementTree(root)
-        # doc.write('output_citygml.gml', pretty_print=True, xml_declaration=True, encoding='UTF-8') 
-    
-
-    
-    
-    
-    
-
-
-#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
-#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
-#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#~~~#
-
-
-          
-           
-# if __name__ == "__main__":
-#     Main_Analysis = Analyzer()
-#     Main_Analysis.height_analysis()
