@@ -2,14 +2,16 @@ import os
 import re
 import random
 import geojson
+import requests
 # import rasterio
 import geopandas
 import shapefile
-import googlemaps
+# import googlemaps
 import pandas as pd
 from dbfread import DBF
 from geojson import dumps
-
+from pyproj import Transformer
+from shapely.geometry import Polygon
 
 class Notification():
     
@@ -81,7 +83,7 @@ class Notification():
         print("   ")
         print("Choose one of below interfaces to continue the process:")
         print("   ")
-        user_input = input ("1_Pythonic interface.\n2_EXCEL file.\n3_CSV file.\n4_Random assignment\n5_Skip and continue.\n6_Restart the process.\nType your answer:  ")  
+        user_input = input ("1_Pythonic interface.\n2_Polygon area calculation\n3_EXCEL file.\n4_CSV file.\n5_Random assignment\n6_Skip and continue.\n7_Restart the process.\nType your answer:  ")  
         return user_input
 
     # Show interfaces to the user and return the selected one
@@ -259,16 +261,16 @@ class Analyzer():
             else:
                 lat = buildings[i]["center"]["lat"]
                 lon = buildings[i]["center"]["lon"]
-                DTM_row, DTM_col = DTM.index(lat, lon)
-                DSM_row, DSM_col = DSM.index(lat, lon)
+                DTM_row, DTM_col = DTM.index(lon, lat)
+                DSM_row, DSM_col = DSM.index(lon, lat)
                 DTM_data = DTM.read(1)
                 DSM_data = DSM.read(1)
                 elevation = DSM_data[DSM_row, DSM_col] - DTM_data[DTM_row, DTM_col]
-                print(elevation)
-                if elevation > 2:
-                    buildings[i]["tags"]["height"] = elevation
-                else:
-                    del buildings[i]
+                buildings[i]["tags"]["height"] = int(elevation)
+        if elevation > 1.9:
+            pass
+        else:
+            del buildings[i]
         return buildings
     
     def random_assign_height_interface(self, buildings, length):
@@ -491,6 +493,35 @@ class Analyzer():
                 buildings[j]["tags"]["surface"] = surface_ask
         return buildings
 
+    def polygon_area(self, buildings, length):
+        for i in range(length):
+            pol = []
+            for j in range(len(buildings[i]["nodes"])):
+                node_id = buildings[i]["nodes"][j]
+                query = f"""
+                    [out:json];
+                    node({node_id});
+                    out center;
+                """
+                response = requests.get(f"http://overpass-api.de/api/interpreter?data={query}")
+                data = response.json()
+                lat = data["elements"][0]["lat"]
+                lon = data["elements"][0]["lon"]
+                proj4326 = Transformer.from_crs("epsg:4326", "epsg:3857")
+                proj3857 = Transformer.from_crs("epsg:3857", "epsg:4326")
+                x, y = proj4326.transform(lon, lat)
+                lon, lat = proj3857.transform(x, y)
+                lon = "{:.7f}".format(lon)
+                lat = "{:.7f}".format(lat)
+                pol.append((float(lon), float(lat)))
+            proj4326 = Transformer.from_crs("epsg:4326", "epsg:3857")
+            proj3857 = Transformer.from_crs("epsg:3857", "epsg:4326")
+            x, y = proj4326.transform(*zip(*pol))
+            poly = Polygon(zip(x, y))
+            area = round(poly.area)
+            buildings[i]["tags"]["surface"] = area     
+        return buildings   
+
     def excel_surface_interface(self, buildings, length):
         surface_dict = {"name": [],
                         "surface": []}
@@ -599,7 +630,7 @@ class Analyzer():
            if "start_date" in buildings[i]["tags"]:
                pass
            else:
-               construnction = random.randint(1965, 1995)
+               construnction = random.randint(1920, 2010)
                buildings[i]["tags"]["start_date"] = construnction
        return buildings     
 

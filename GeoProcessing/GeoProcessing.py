@@ -134,13 +134,16 @@ class GeoDataProcess():
             interface = Notification.building_surface_interface(self)
             if interface == "1":   #Python
                 self.selected_buildings = Analyzer.pythonic_surface_interface(self, self.selected_buildings, length)
-            elif interface == "2": #Excel
+            elif interface == "2": #Polygon
+                self.selected_buildings = Analyzer.polygon_area(self, self.selected_buildings, length)
+                print("Number of floors has been successfully calculated based on the height of each building")
+            elif interface == "3": #Excel
                 self.selected_buildings = Analyzer.excel_surface_interface(self, self.selected_buildings, length)
-            elif interface == "3": #CSV
+            elif interface == "4": #CSV
                 self.selected_buildings = Analyzer.csv_surface_interface(self, self.selected_buildings, length)
-            elif interface == "4": #Random assign
+            elif interface == "5": #Random assign
                 self.selected_buildings = Analyzer.random_assign_surface_interface(self, self.selected_buildings, length)
-            elif interface == "5": #Skip
+            elif interface == "6": #Skip
                 pass
             else:
                 self.Building_selector()
@@ -182,7 +185,6 @@ class GeoDataProcess():
     def HVAC_type_assign(self):
         length = Analyzer.__len__(self, self.selected_buildings)
         self.selected_buildings = Analyzer.HVAC_type(self, self.selected_buildings, length)
-
 
     def Supply_type_assign(self):
         length = Analyzer.__len__(self, self.selected_buildings)
