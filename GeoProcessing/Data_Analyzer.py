@@ -514,6 +514,7 @@ class Analyzer():
                 lon = "{:.7f}".format(lon)
                 lat = "{:.7f}".format(lat)
                 pol.append((float(lon), float(lat)))
+            buildings[i]["polygon"] = pol
             proj4326 = Transformer.from_crs("epsg:4326", "epsg:3857")
             proj3857 = Transformer.from_crs("epsg:3857", "epsg:4326")
             x, y = proj4326.transform(*zip(*pol))
@@ -630,7 +631,7 @@ class Analyzer():
            if "start_date" in buildings[i]["tags"]:
                pass
            else:
-               construnction = random.randint(1920, 2010)
+               construnction = random.randint(1950, 2010)
                buildings[i]["tags"]["start_date"] = construnction
        return buildings     
 
@@ -642,18 +643,23 @@ class Analyzer():
         for j in range(length):
             if selected_buildings[j]["tags"]["start_date"] in range(1000, 1921):
                 selected_buildings[j]["tags"]["Construction_standard"] = "STANDARD1"
+                selected_buildings[j]["tags"]["Materials"] = "Stone and Masonry"
                 
             elif selected_buildings[j]["tags"]["start_date"] in range(1920, 1971):
                 selected_buildings[j]["tags"]["Construction_standard"] = "STANDARD2"
+                selected_buildings[j]["tags"]["Materials"] = "Concrete and Masonry"
         
             elif selected_buildings[j]["tags"]["start_date"] in range(1971, 1980):
                 selected_buildings[j]["tags"]["Construction_standard"] = "STANDARD3"
+                selected_buildings[j]["tags"]["Materials"] = "Concrete and Masonry"
         
             elif selected_buildings[j]["tags"]["start_date"] in range(1981, 2000):
                 selected_buildings[j]["tags"]["Construction_standard"] = "STANDARD4"
+                selected_buildings[j]["tags"]["Materials"] = "Concrete and Masonry"
         
             elif selected_buildings[j]["tags"]["start_date"] in range(2000, 2040):
                 selected_buildings[j]["tags"]["Construction_standard"] = "STANDARD5"
+                selected_buildings[j]["tags"]["Materials"] = "Concrete and Masonry, Minergie Standard"
             else:
                 standard = ["STANDARD1", "STANDARD2", "STANDARD3", "STANDARD4", "STANDARD5"]
                 random_standard = random.choice(standard)
