@@ -46,5 +46,5 @@ class Notifications:
         
     def API_components(self):
         City = input("Type the name of the city: ")
-        API_KEY = "09e35ebcf6f04c3f6398db89e0b9ae7d"      
+        API_KEY = "08s35ebcf6f04c3f6368db79e0b9ae2d"      
         return City, API_KEY
