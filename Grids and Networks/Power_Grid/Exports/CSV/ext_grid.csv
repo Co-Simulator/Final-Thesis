@@ -1,0 +1,2 @@
+,name,bus,vm_pu,va_degree,slack_weight,in_service,min_p_mw,max_p_mw,min_q_mvar,max_q_mvar
+0,,0,1.0,0.0,1.0,True,0.0,30.0,-1000.0,1500.0
